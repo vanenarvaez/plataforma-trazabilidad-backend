@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { getProyectos, createProyecto } from "./proyectos.controller";
+import {
+  getProyectos,
+  getProyectoById,
+  createProyecto,
+  updateProyecto,
+} from "./proyectos.controller";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { authorizeRoles } from "../../middlewares/roles.middleware";
 
@@ -20,6 +25,27 @@ const router = Router();
  *         description: Acceso no autorizado para este rol
  */
 router.get("/", verifyToken, authorizeRoles("director"), getProyectos);
+
+/**
+ * @swagger
+ * /api/proyectos/{id}:
+ *   get:
+ *     summary: Consultar proyecto por id
+ *     tags: [Proyectos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Id del proyecto
+ *     responses:
+ *       200:
+ *         description: Proyecto encontrado correctamente
+ *       404:
+ *         description: Proyecto no encontrado
+ */
+router.get("/:id", verifyToken, authorizeRoles("director"), getProyectoById);
 
 /**
  * @swagger
@@ -83,5 +109,58 @@ router.get("/", verifyToken, authorizeRoles("director"), getProyectos);
  *         description: Acceso no autorizado para este rol
  */
 router.post("/", verifyToken, authorizeRoles("director"), createProyecto);
+
+/**
+ * @swagger
+ * /api/proyectos/{id}:
+ *   put:
+ *     summary: Actualizar proyecto
+ *     tags: [Proyectos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Id del proyecto
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               fuenteFinanciacion:
+ *                 type: string
+ *               cliente:
+ *                 type: string
+ *               fechaInicio:
+ *                 type: string
+ *                 format: date
+ *               fechaFin:
+ *                 type: string
+ *                 format: date
+ *               estado:
+ *                 type: string
+ *                 enum: [planeacion, ejecucion, finalizado]
+ *               cantidadMunicipios:
+ *                 type: number
+ *               cantidadIE:
+ *                 type: number
+ *               cantidadSedes:
+ *                 type: number
+ *               cantidadDocentes:
+ *                 type: number
+ *               cantidadEstudiantes:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Proyecto actualizado correctamente
+ *       404:
+ *         description: Proyecto no encontrado
+ */
+router.put("/:id", verifyToken, authorizeRoles("director"), updateProyecto);
 
 export default router;
