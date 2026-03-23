@@ -10,7 +10,8 @@ import proyectoCursosRoutes from "../modules/proyectoCursos/proyectoCurso.routes
 import asistenciasRoutes from "../modules/asistencias/asistencias.routes";
 import elegibleRoutes from "../modules/elegible/elegible.routes";
 import certificadoRoutes from "../modules/certificados/certificado.routes";
-
+import encuestaRoutes from "../modules/encuestas/encuesta.routes";
+import respuestaEncuestaRoutes from "../modules/respuestasEncuesta/respuestaEncuesta.routes";
 
 const router = Router();
 
@@ -24,6 +25,8 @@ router.use("/proyecto-cursos", proyectoCursosRoutes);
 router.use("/asistencias", asistenciasRoutes);
 router.use("/elegible", elegibleRoutes);
 router.use("/certificados", certificadoRoutes);
+router.use("/encuestas", encuestaRoutes);
+router.use("/respuestas-encuesta", respuestaEncuestaRoutes);
 
 
 export default router;
