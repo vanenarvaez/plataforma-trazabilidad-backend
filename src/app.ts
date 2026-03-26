@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
 import swaggerUi from "swagger-ui-express";
 import routes from "./routes";
 import swaggerSpec from "./docs/swagger";
@@ -8,6 +9,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Servir archivos estáticos de la carpeta uploads
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 /**
  * @swagger

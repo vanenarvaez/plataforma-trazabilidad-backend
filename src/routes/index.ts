@@ -12,6 +12,7 @@ import elegibleRoutes from "../modules/elegible/elegible.routes";
 import certificadoRoutes from "../modules/certificados/certificado.routes";
 import encuestaRoutes from "../modules/encuestas/encuesta.routes";
 import respuestaEncuestaRoutes from "../modules/respuestasEncuesta/respuestaEncuesta.routes";
+import indicadoresRoutes from "../modules/indicadores/indicadores.routes";
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use("/elegible", elegibleRoutes);
 router.use("/certificados", certificadoRoutes);
 router.use("/encuestas", encuestaRoutes);
 router.use("/respuestas-encuesta", respuestaEncuestaRoutes);
+router.use("/indicadores", indicadoresRoutes);
 
 
 export default router;

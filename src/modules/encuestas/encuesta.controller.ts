@@ -69,3 +69,17 @@ export const obtenerEncuestaPorId = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Listar encuestas públicas
+export const listarEncuestasPublicas = async (_req: Request, res: Response) => {
+  try {
+    const encuestas = await Encuesta.find({ activa: true }).sort({ createdAt: -1 });
+
+    res.status(200).json(encuestas);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al listar encuestas públicas",
+      error,
+    });
+  }
+};

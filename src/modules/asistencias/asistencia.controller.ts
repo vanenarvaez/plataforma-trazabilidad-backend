@@ -4,7 +4,6 @@ import Docente from "../docentes/models/docente.model";
 import ProyectoCurso from "../proyectoCursos/models/proyectoCurso.model";
 import Curso from "../cursos/models/curso.model";
 
-
 // Registrar asistencia
 export const registrarAsistencia = async (req: Request, res: Response) => {
   try {
@@ -94,7 +93,13 @@ export const listarAsistencias = async (_req: Request, res: Response) => {
   try {
     const asistencias = await Asistencia.find()
       .populate("docenteId", "nombres apellidos numeroDocumento")
-      .populate("proyectoCursoId");
+      .populate({
+        path: "proyectoCursoId",
+        populate: [
+          { path: "proyectoId", select: "nombre" },
+          { path: "cursoId", select: "nombreCurso numeroModulos" },
+        ],
+      });
 
     res.status(200).json(asistencias);
   } catch (error) {
@@ -115,7 +120,13 @@ export const obtenerAsistenciasPorProyectoCurso = async (
 
     const asistencias = await Asistencia.find({ proyectoCursoId })
       .populate("docenteId", "nombres apellidos numeroDocumento")
-      .populate("proyectoCursoId");
+      .populate({
+        path: "proyectoCursoId",
+        populate: [
+          { path: "proyectoId", select: "nombre" },
+          { path: "cursoId", select: "nombreCurso numeroModulos" },
+        ],
+      });
 
     res.status(200).json(asistencias);
   } catch (error) {

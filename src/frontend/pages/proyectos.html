@@ -23,6 +23,11 @@
       <span class="text-white fw-bold">Plataforma de Trazabilidad</span>
     </div>
 
+    <div class="text-white text-end me-3">
+      <div id="nombreUsuario" class="fw-semibold"></div>
+      <small id="rolUsuario"></small>
+    </div>
+
     <button class="btn btn-light btn-sm" onclick="logout()">Cerrar sesión</button>
   </nav>
 
@@ -30,12 +35,12 @@
     <div class="p-3" style="width: 250px; background: var(--color-gray); min-height: 100vh;">
       <h6 class="text-brand fw-bold mb-3">Menú</h6>
 
-      <a href="dashboard.html" class="sidebar-link">Dashboard</a>
-      <a href="proyectos.html" class="sidebar-link active">Proyectos</a>
-      <a href="instituciones.html" class="sidebar-link">Instituciones</a>
-      <a href="docentes.html" class="sidebar-link">Docentes</a>
-      <a href="asistencias.html" class="sidebar-link">Asistencias</a>
-      <a href="encuestas.html" class="sidebar-link">Encuestas</a>
+      <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador,comercial">Dashboard</a>
+      <a href="proyectos.html" class="sidebar-link active" data-roles="admin,director">Proyectos</a>
+      <a href="instituciones.html" class="sidebar-link" data-roles="admin,director">Instituciones</a>
+      <a href="docentes.html" class="sidebar-link" data-roles="admin,pedagogico,formador">Docentes</a>
+      <a href="asistencias.html" class="sidebar-link" data-roles="admin,pedagogico,formador">Asistencias</a>
+      <a href="encuestas.html" class="sidebar-link" data-roles="admin,pedagogico">Encuestas</a>
     </div>
 
     <div class="p-4 w-100">
@@ -54,23 +59,23 @@
 
           <div class="col-md-6">
             <label class="form-label">Fuente de financiación</label>
-            <input type="text" id="fuenteFinanciacion" class="form-control" />
+            <select id="fuenteFinanciacion" class="form-select">
+              <option value="">Seleccione una opción</option>
+              <option value="Recursos Propios">Recursos Propios</option>
+              <option value="RSE – Responsabilidad Social Empresarial">RSE – Responsabilidad Social Empresarial</option>
+              <option value="Convenio">Convenio</option>
+              <option value="Regalías directas">Regalías directas</option>
+              <option value="Donación">Donación</option>
+              <option value="Obras por impuestos">Obras por impuestos</option>
+              <option value="Cooperación">Cooperación</option>
+              <option value="Gestión Social">Gestión Social</option>
+              <option value="OCAD Paz">OCAD Paz</option>
+            </select>
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">Fuente de financiación</label>
-            <select id="fuenteFinanciacion" class="form-select">
-                <option value="">Seleccione una opción</option>
-                <option value="Recursos Propios">Recursos Propios</option>
-                <option value="RSE – Responsabilidad Social Empresarial">RSE – Responsabilidad Social Empresarial</option>
-                <option value="Convenio">Convenio</option>
-                <option value="Regalías directas">Regalías directas</option>
-                <option value="Donación">Donación</option>
-                <option value="Obras por impuestos">Obras por impuestos</option>
-                <option value="Cooperación">Cooperación</option>
-                <option value="Gestión Social">Gestión Social</option>
-                <option value="OCAD Paz">OCAD Paz</option>
-            </select>
+            <label class="form-label">Cliente</label>
+            <input type="text" id="cliente" class="form-control" />
           </div>
 
           <div class="col-md-3">
@@ -152,6 +157,10 @@
     </div>
   </div>
 
+  <script src="../js/layout.js"></script>
   <script src="../js/proyectos.js"></script>
+  <script>
+    aplicarPermisosPorRol();
+  </script>
 </body>
 </html>

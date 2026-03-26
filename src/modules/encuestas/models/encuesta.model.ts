@@ -49,7 +49,7 @@ const encuestaSchema = new mongoose.Schema(
     tipo: {
       type: String,
       required: true,
-      enum: ["caracterizacion", "satisfaccion", "diagnostica"],
+      enum: ["caracterizacion", "satisfaccion", "diagnostica", "otro"],
     },
     descripcion: {
       type: String,

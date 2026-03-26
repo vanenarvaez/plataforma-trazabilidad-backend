@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Encuestas</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <nav class="navbar px-4 py-3" style="background-color: var(--color-primary);">
+    <div class="d-flex align-items-center gap-3">
+      <img
+        src="../images/logo1morado.png"
+        alt="Aulas Amigas"
+        style="height:55px; object-fit: contain;"
+      />
+      <span class="text-white fw-bold">Plataforma de Trazabilidad</span>
+    </div>
+
+    <div class="text-white text-end me-3">
+      <div id="nombreUsuario" class="fw-semibold"></div>
+      <small id="rolUsuario"></small>
+    </div>
+
+    <button class="btn btn-light btn-sm" onclick="logout()">Cerrar sesión</button>
+  </nav>
+
+  <div class="d-flex">
+    <div class="p-3" style="width: 250px; background: var(--color-gray); min-height: 100vh;">
+      <h6 class="text-brand fw-bold mb-3">Menú</h6>
+
+      <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador,comercial">Dashboard</a>
+      <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
+      <a href="instituciones.html" class="sidebar-link" data-roles="admin,director">Instituciones</a>
+      <a href="docentes.html" class="sidebar-link" data-roles="admin,pedagogico,formador">Docentes</a>
+      <a href="asistencias.html" class="sidebar-link" data-roles="admin,pedagogico,formador">Asistencias</a>
+      <a href="encuestas.html" class="sidebar-link active" data-roles="admin,pedagogico">Encuestas</a>
+    </div>
+
+    <div class="p-4 w-100">
+      <h2 class="text-brand fw-bold mb-4">Gestión de encuestas</h2>
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="card shadow-sm p-4 h-100">
+            <h5 class="mb-3 text-brand">Encuestas registradas</h5>
+
+            <div class="mb-3">
+              <label class="form-label">Selecciona una encuesta</label>
+              <select id="encuestaDetalleSelect" class="form-select">
+                <option value="">Cargando encuestas...</option>
+              </select>
+            </div>
+
+            <div id="detalleEncuestaSeleccionada" class="small text-muted">
+              Selecciona una encuesta para ver su detalle.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-8">
+          <div class="card shadow-sm p-4 h-100">
+            <h5 class="mb-3 text-brand">Avance por proyecto</h5>
+
+            <div id="alertaAvanceProyecto" class="alert alert-danger d-none" role="alert"></div>
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Proyecto</label>
+                <select id="proyectoIdFiltro" class="form-select">
+                  <option value="">Cargando proyectos...</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Encuesta</label>
+                <select id="encuestaIdFiltro" class="form-select">
+                  <option value="todas">Todas las encuestas</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Estado</label>
+                <select id="estadoEncuestaFiltro" class="form-select">
+                  <option value="todos">Todos</option>
+                  <option value="respondieron">Respondieron</option>
+                  <option value="faltan">Faltan</option>
+                </select>
+              </div>
+
+              <div class="col-md-12 d-flex flex-wrap gap-2">
+                <button id="btnConsultarProyecto" class="btn btn-primary">
+                  Consultar avance
+                </button>
+
+                <button id="btnDescargarCsvEncuestas" class="btn btn-outline-success" disabled>
+                  Descargar CSV filtrado
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-3 mb-2 fw-semibold text-primary">
+              Consulta el avance por proyecto, por encuesta específica o de forma consolidada, y descarga la información filtrada.
+            </div>
+
+            <div class="mb-4 fw-semibold text-primary">
+              La opción Todos los proyectos solo aplica cuando selecciones una encuesta específica.
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-3">
+                <div class="card border text-center h-100">
+                  <div class="card-body">
+                    <h6>Total docentes</h6>
+                    <h3 id="kpiTotalDocentes">0</h3>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="card border text-center h-100">
+                  <div class="card-body">
+                    <h6>Respondieron</h6>
+                    <h3 id="kpiRespondieron">0</h3>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="card border text-center h-100">
+                  <div class="card-body">
+                    <h6>Faltan</h6>
+                    <h3 id="kpiFaltan">0</h3>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="card border text-center h-100">
+                  <div class="card-body">
+                    <h6>% cumplimiento</h6>
+                    <h3 id="kpiPorcentajeCumplimiento">0%</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-3 align-items-center">
+              <div class="col-md-7">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                  <h6 class="mb-0 text-brand">Resumen visual</h6>
+                  <span id="resumenFiltroEncuestas" class="badge text-bg-light border">
+                    Sin resultados consultados
+                  </span>
+                </div>
+
+                <div style="max-width: 360px;">
+                  <canvas id="graficoCumplimientoEncuestas"></canvas>
+                </div>
+              </div>
+
+              <div class="col-md-5">
+                <div class="small text-muted">
+                  El gráfico muestra el porcentaje de docentes que ya respondieron frente a los que siguen pendientes, según el proyecto y la encuesta seleccionada.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h5 class="mb-0 text-brand">Crear encuesta</h5>
+
+          <button
+            class="btn btn-outline-primary btn-sm"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseCrearEncuesta"
+            aria-expanded="false"
+            aria-controls="collapseCrearEncuesta"
+          >
+            Mostrar / ocultar
+          </button>
+        </div>
+
+        <div class="collapse mt-4" id="collapseCrearEncuesta">
+          <div class="d-flex justify-content-end mb-3">
+            <button type="button" id="btnAgregarPregunta" class="btn btn-outline-primary btn-sm">
+              Agregar pregunta
+            </button>
+          </div>
+
+          <form id="formCrearEncuesta">
+            <div class="row g-3 mb-3">
+              <div class="col-md-3">
+                <label class="form-label">Código</label>
+                <input type="text" id="encuestaCodigo" class="form-control" placeholder="Ej: ENC-001" required />
+              </div>
+
+              <div class="col-md-5">
+                <label class="form-label">Nombre</label>
+                <input type="text" id="encuestaNombre" class="form-control" placeholder="Nombre de la encuesta" required />
+              </div>
+
+              <div class="col-md-2">
+                <label class="form-label">Tipo</label>
+                <select id="encuestaTipo" class="form-select" required>
+                  <option value="">Seleccione</option>
+                  <option value="caracterizacion">Caracterización</option>
+                  <option value="diagnostica">Diagnóstica</option>
+                  <option value="satisfaccion">Satisfacción</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+
+              <div class="col-md-2">
+                <label class="form-label">Estado</label>
+                <select id="encuestaActiva" class="form-select">
+                  <option value="true" selected>Activa</option>
+                  <option value="false">Inactiva</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Descripción</label>
+                <textarea id="encuestaDescripcion" class="form-control" rows="2" placeholder="Descripción general de la encuesta"></textarea>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Mensaje inicial</label>
+                <textarea id="encuestaMensajeInicial" class="form-control" rows="2" placeholder="Mensaje de bienvenida o indicaciones"></textarea>
+              </div>
+            </div>
+
+            <hr />
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0 text-brand">Preguntas</h6>
+              <span id="contadorPreguntas" class="badge text-bg-light border">0 preguntas</span>
+            </div>
+
+            <div id="contenedorPreguntas" class="d-flex flex-column gap-3 mb-3"></div>
+
+            <div class="d-flex flex-wrap gap-2">
+              <button type="submit" id="btnGuardarEncuesta" class="btn btn-success">
+                Guardar encuesta
+              </button>
+              <button type="button" id="btnLimpiarEncuesta" class="btn btn-outline-secondary">
+                Limpiar formulario
+              </button>
+            </div>
+
+            <div id="mensajeCrearEncuesta" class="mt-3 small"></div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h5 class="mb-0 text-brand">Detalle por docente</h5>
+          <span class="small text-muted">
+            El estado indica si el docente ya respondió la encuesta seleccionada o si aún está pendiente.
+          </span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Docente</th>
+                <th>Encuesta consultada</th>
+                <th>Respondió</th>
+                <th>Total respuestas</th>
+                <th>Estado encuesta</th>
+              </tr>
+            </thead>
+            <tbody id="tablaAvanceEncuestas">
+              <tr>
+                <td colspan="6" class="text-center">
+                  Selecciona un proyecto para consultar el avance
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card shadow-sm p-4">
+        <h5 class="mb-3 text-brand">Consulta individual por docente</h5>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-9">
+            <label class="form-label">Buscar docente</label>
+            <input
+              type="text"
+              id="buscadorDocente"
+              class="form-control"
+              placeholder="Escribe nombre o documento"
+              list="listaSugerenciasDocentes"
+              autocomplete="off"
+            />
+            <datalist id="listaSugerenciasDocentes"></datalist>
+            <input type="hidden" id="docenteIdSeleccionado" />
+            <div class="form-text">
+              Escribe el nombre o documento y selecciona una coincidencia sugerida.
+            </div>
+          </div>
+
+          <div class="col-md-3 d-flex align-items-end">
+            <button id="btnConsultarRespuestas" class="btn btn-secondary w-100">
+              Consultar respuestas
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive mb-4">
+          <table class="table table-bordered table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Encuesta</th>
+                <th>Fecha</th>
+                <th>Completada</th>
+                <th>Observaciones</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tablaRespuestas">
+              <tr>
+                <td colspan="5" class="text-center">Selecciona un docente para consultar respuestas</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h6 class="text-brand">Detalle de respuestas</h6>
+        <div id="detalleRespuesta" class="text-muted">
+          Aquí se mostrará el detalle de la respuesta seleccionada.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/encuestas.js"></script>
+  <script>
+    aplicarPermisosPorRol();
+  </script>
+</body>
+</html>

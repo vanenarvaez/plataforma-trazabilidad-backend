@@ -3,12 +3,22 @@ import {
   crearEncuesta,
   listarEncuestas,
   obtenerEncuestaPorId,
+  listarEncuestasPublicas,
 } from "./encuesta.controller";
 
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { authorizeRoles } from "../../middlewares/roles.middleware";
 
 const router = Router();
+
+/**
+ * @swagger
+ * /api/encuestas/publicas:
+ *   get:
+ *     summary: Listar encuestas públicas activas
+ *     tags: [Encuestas]
+ */
+router.get("/publicas", listarEncuestasPublicas);
 
 /**
  * @swagger

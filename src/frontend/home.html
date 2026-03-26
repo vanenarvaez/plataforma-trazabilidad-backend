@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aulas Amigas - Plataforma de Trazabilidad</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body class="bg-soft">
+
+  <nav class="navbar navbar-expand-lg px-4 py-3 bg-white shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-3" href="./home.html">
+        <img src="./images/logo4rosado.png" alt="Aulas Amigas" style="height: 154px; object-fit: contain;" />
+      </a>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#menuPublico"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="menuPublico">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-4">
+          <li class="nav-item">
+            <a class="nav-link fw-semibold" href="./pages/public.html">Gestión docente</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link fw-semibold" href="./pages/impacto.html">Impacto</a>
+          </li>
+        </ul>
+
+        <a href="./index.html" class="btn btn-primary px-4">Ingresar</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="py-5" style="background: linear-gradient(90deg, rgba(70,44,185,0.12) 0%, rgba(217,12,241,0.12) 100%);">
+    <div class="container text-center py-5">
+      <h1 class="fw-bold mb-3" style="color: var(--color-dark);">
+        Transformamos la educación a través de la innovación educativa
+      </h1>
+      <p class="lead text-muted mb-4">
+        Plataforma para la trazabilidad de procesos formativos, encuestas, asistencia, certificación e indicadores.
+      </p>
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="./pages/public.html" class="btn btn-primary px-4">Gestión docente</a>
+        <a href="./pages/impacto.html" class="btn btn-secondary px-4">Ver impacto</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="container py-5">
+    <div id="carouselAulasAmigas" class="carousel slide shadow-sm rounded overflow-hidden" data-bs-ride="carousel">
+      <div class="carousel-inner">
+
+        <div class="carousel-item active">
+          <img src="./images/foto1.jpg" class="d-block w-100" alt="Proyecto 1" style="height: 420px; object-fit: cover;">
+        </div>
+
+        <div class="carousel-item">
+          <img src="./images/foto2.jpg" class="d-block w-100" alt="Proyecto 2" style="height: 420px; object-fit: cover;">
+        </div>
+
+        <div class="carousel-item">
+          <img src="./images/foto3.jpg" class="d-block w-100" alt="Proyecto 3" style="height: 420px; object-fit: cover;">
+        </div>
+
+      </div>
+
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselAulasAmigas" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselAulasAmigas" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="container pb-5">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card shadow-sm p-4 h-100">
+          <h5 class="text-brand fw-bold">Gestión docente</h5>
+          <p class="text-muted mb-0">
+            Consulta de certificados y seguimiento de información asociada al proceso formativo del docente.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card shadow-sm p-4 h-100">
+          <h5 class="text-brand fw-bold">Procesos formativos</h5>
+          <p class="text-muted mb-0">
+            Registro y trazabilidad de asistencia, resultados y encuestas del proceso de formación.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card shadow-sm p-4 h-100">
+          <h5 class="text-brand fw-bold">Impacto</h5>
+          <p class="text-muted mb-0">
+            Visualización de indicadores públicos consolidados para apoyar la toma de decisiones y la rendición de cuentas.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-4 mt-4" style="background: linear-gradient(90deg, var(--color-highlight), var(--color-accent1));">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="text-white small">
+        Circular 2 # 68-145, Laureles, Medellín Colombia<br />
+        +57 318735 0499
+      </div>
+      <img src="./images/logo5blanco.png" alt="Aulas Amigas" style="height: 154px; object-fit: contain;" />
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
