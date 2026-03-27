@@ -1,11 +1,27 @@
 import { Request, Response } from "express";
 import Curso from "./models/curso.model";
+import Proyecto from "../proyectos/models/proyecto.model";
+import ProyectoCurso from "../proyectoCursos/models/proyectoCurso.model";
 
 // Crear curso
 export const crearCurso = async (req: Request, res: Response) => {
   try {
     const curso = new Curso(req.body);
     const cursoGuardado = await curso.save();
+
+    const proyectos = await Proyecto.find();
+
+    if (proyectos.length > 0) {
+      const relaciones = proyectos.map((proyecto) => ({
+        proyectoId: proyecto._id,
+        cursoId: cursoGuardado._id,
+        activo: true,
+      }));
+
+      await ProyectoCurso.insertMany(relaciones, { ordered: false }).catch(
+        () => undefined
+      );
+    }
 
     res.status(201).json({
       message: "Curso registrado correctamente",

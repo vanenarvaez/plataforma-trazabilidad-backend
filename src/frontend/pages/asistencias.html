@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
-
   <nav class="navbar px-4 py-3" style="background-color: var(--color-primary);">
     <div class="d-flex align-items-center gap-3">
       <img
@@ -36,80 +35,297 @@
     <div class="p-3" style="width: 250px; background: var(--color-gray); min-height: 100vh;">
       <h6 class="text-brand fw-bold mb-3">Menú</h6>
 
-      <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,docente">Dashboard</a>
+      <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador,docente">Dashboard</a>
       <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
       <a href="instituciones.html" class="sidebar-link" data-roles="admin,director">Instituciones</a>
-      <a href="docentes.html" class="sidebar-link" data-roles="admin,director">Docentes</a>
-      <a href="asistencias.html" class="sidebar-link active" data-roles="admin,director,docente">Asistencias</a>
-      <a href="encuestas.html" class="sidebar-link" data-roles="admin,director,docente">Encuestas</a>
+      <a href="docentes.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Docentes</a>
+      <a href="asistencias.html" class="sidebar-link active" data-roles="admin,director,pedagogico,formador">Asistencias</a>
+      <a href="encuestas.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Encuestas</a>
     </div>
 
     <div class="p-4 w-100">
       <h2 class="text-brand fw-bold mb-4">Gestión de asistencias</h2>
 
-      <div class="card shadow-sm p-4 mb-4">
-        <h5 class="mb-3 text-brand">Registrar asistencia</h5>
+      <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+          <div class="card shadow-sm p-4 mb-4">
+            <h5 class="mb-3 text-brand">Registrar asistencia</h5>
 
-        <form id="asistenciaForm" class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">Formación asociada a proyecto</label>
-            <select id="proyectoCursoId" class="form-select" required>
-              <option value="">Cargando relaciones curso-proyecto...</option>
-            </select>
+            <form id="asistenciaForm" class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Proyecto</label>
+                <select id="proyectoIdRegistro" class="form-select" required>
+                  <option value="">Cargando proyectos...</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Curso / formación</label>
+                <select id="cursoIdRegistro" class="form-select" required disabled>
+                  <option value="">Seleccione primero un proyecto</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Docente</label>
+                <input
+                  type="text"
+                  id="buscadorDocenteRegistro"
+                  class="form-control"
+                  placeholder="Escribe nombre o cédula"
+                  list="listaDocentesRegistro"
+                  autocomplete="off"
+                  disabled
+                  required
+                />
+                <datalist id="listaDocentesRegistro"></datalist>
+                <input type="hidden" id="docenteIdRegistro" />
+                <div class="form-text">
+                  Busca por nombre o documento. Solo se mostrarán docentes del proyecto seleccionado.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Módulo</label>
+                <select id="moduloNumeroRegistro" class="form-select" required disabled>
+                  <option value="">Seleccione un curso</option>
+                </select>
+              </div>
+
+              <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="asistioRegistro" checked />
+                  <label class="form-check-label" for="asistioRegistro">Asistió</label>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div id="mensajeAsistencia" class="small"></div>
+              </div>
+
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">Guardar asistencia</button>
+              </div>
+            </form>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label">Docente</label>
-            <select id="docenteId" class="form-select" required>
-              <option value="">Cargando docentes...</option>
-            </select>
-          </div>
+          <div class="card shadow-sm p-4">
+            <h5 class="mb-3 text-brand">Crear formación / curso</h5>
 
-          <div class="col-md-3">
-            <label class="form-label">Número de módulo</label>
-            <input type="number" id="moduloNumero" class="form-control" min="1" required />
-          </div>
+            <form id="formCrearCurso" class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Nombre del curso</label>
+                <input type="text" id="nombreCurso" class="form-control" required />
+              </div>
 
-          <div class="col-md-3 d-flex align-items-end">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="asistio" checked />
-              <label class="form-check-label" for="asistio">Asistió</label>
+              <div class="col-md-6">
+                <label class="form-label">Número de módulos</label>
+                <input
+                  type="number"
+                  id="numeroModulos"
+                  class="form-control"
+                  min="1"
+                  placeholder="Ej. 4"
+                  required
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Duración en horas</label>
+                <input
+                  type="number"
+                  id="duracionHoras"
+                  class="form-control"
+                  min="1"
+                  placeholder="Ej. 40"
+                  required
+                />
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Tipo de formación</label>
+                <select id="tipoFormacion" class="form-select" required>
+                  <option value="">Seleccione</option>
+                  <option value="presencial">Presencial</option>
+                  <option value="virtual">Virtual</option>
+                  <option value="mixto">Mixto</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Descripción</label>
+                <textarea id="descripcionCurso" class="form-control" rows="3"></textarea>
+              </div>
+
+              <div class="col-12">
+                <div id="mensajeCurso" class="small"></div>
+              </div>
+
+              <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-success">Crear formación</button>
+                <button type="button" id="btnLimpiarCurso" class="btn btn-outline-secondary">Limpiar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="card shadow-sm p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <h5 class="mb-0 text-brand">Consolidado de asistencias</h5>
+              <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-primary btn-sm" id="btnConsultarConsolidado">Consultar</button>
+                <button class="btn btn-outline-secondary btn-sm" id="btnLimpiarFiltros">Limpiar filtros</button>
+                <button class="btn btn-outline-success btn-sm" id="btnDescargarCsvAsistencias" disabled>Descargar CSV</button>
+              </div>
+            </div>
+
+            <div id="alertaAsistencias" class="alert alert-danger d-none" role="alert"></div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Proyecto</label>
+                <select id="proyectoIdFiltro" class="form-select">
+                  <option value="">Todos los proyectos</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Curso / formación</label>
+                <select id="cursoIdFiltro" class="form-select">
+                  <option value="">Todos los cursos</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Módulo</label>
+                <select id="moduloNumeroFiltro" class="form-select" disabled>
+                  <option value="">Todos</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Certificación</label>
+                <select id="estadoCertificacionFiltro" class="form-select">
+                  <option value="todos">Todos</option>
+                  <option value="certificados">Certificados</option>
+                  <option value="no_certificados">No certificados</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Asistencia del módulo</label>
+                <select id="estadoAsistenciaModuloFiltro" class="form-select" disabled>
+                  <option value="todos">Todos</option>
+                  <option value="asistio">Asistió</option>
+                  <option value="no_asistio">No asistió</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="small text-primary fw-semibold mb-4">
+              Filtra por proyecto, curso, módulo y estado. El consolidado y los gráficos solo toman relaciones activas.
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-3">
+                <div class="card border text-center h-100">
+                  <div class="card-body">
+                    <h6>Total docentes</h6>
+                    <h3 id="kpiTotalDocentesAsistencia">0</h3>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="card border text-center h-100">
+                  <div class="card-body">
+                    <h6>Cumplen asistencia</h6>
+                    <h3 id="kpiCumplenAsistencia">0</h3>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="card border text-center h-100">
+                  <div class="card-body">
+                    <h6>Certificados</h6>
+                    <h3 id="kpiCertificados">0</h3>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="card border text-center h-100">
+                  <div class="card-body">
+                    <h6>Pendientes</h6>
+                    <h3 id="kpiPendientes">0</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-md-8">
+                <div class="card border p-3 h-100">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <h6 class="mb-0 text-brand">Avance por módulos (%)</h6>
+                    <span id="resumenFiltrosAsistencia" class="badge text-bg-light border">
+                      Sin resultados consultados
+                    </span>
+                  </div>
+                  <canvas id="graficoAsistenciasModulos" height="120"></canvas>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card border p-3 h-100">
+                  <h6 class="mb-3 text-brand">Certificados vs no certificados</h6>
+                  <canvas id="graficoCertificadosTorta" height="180"></canvas>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div class="col-12">
-            <div id="mensajeAsistencia" class="small"></div>
-          </div>
-
-          <div class="col-12">
-            <button type="submit" class="btn btn-primary">Guardar asistencia</button>
-          </div>
-        </form>
+        </div>
       </div>
 
       <div class="card shadow-sm p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0 text-brand">Listado de asistencias</h5>
-          <button class="btn btn-secondary btn-sm" id="btnRecargarAsistencias">
-            Recargar
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <h5 class="mb-0 text-brand">Consulta detallada por docente</h5>
+          <button class="btn btn-outline-success btn-sm" id="btnDescargarCsvDetalleDocente" disabled>
+            Descargar CSV detalle
           </button>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-9">
+            <label class="form-label">Docente</label>
+            <select id="docenteIdDetalle" class="form-select">
+              <option value="">Seleccione un docente</option>
+            </select>
+          </div>
+
+          <div class="col-md-3 d-flex align-items-end">
+            <button id="btnConsultarDetalleDocente" class="btn btn-secondary w-100">
+              Consultar detalle
+            </button>
+          </div>
         </div>
 
         <div class="table-responsive">
           <table class="table table-bordered table-hover align-middle">
             <thead>
               <tr>
-                <th>Docente</th>
-                <th>Documento</th>
-                <th>Proyecto-Curso</th>
+                <th>Proyecto</th>
+                <th>Curso</th>
                 <th>Módulo</th>
                 <th>Asistió</th>
-                <th>Fecha</th>
+                <th>Fecha registro</th>
               </tr>
             </thead>
-            <tbody id="tablaAsistencias">
+            <tbody id="tablaDetalleDocente">
               <tr>
-                <td colspan="6" class="text-center">Cargando asistencias...</td>
+                <td colspan="5" class="text-center">Selecciona un docente para consultar el detalle</td>
               </tr>
             </tbody>
           </table>
@@ -118,7 +334,7 @@
     </div>
   </div>
 
-  <!-- Scripts al final -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../js/layout.js"></script>
   <script src="../js/asistencias.js"></script>
   <script>

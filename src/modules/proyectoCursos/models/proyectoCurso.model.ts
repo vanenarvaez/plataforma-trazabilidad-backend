@@ -13,10 +13,17 @@ const proyectoCursoSchema = new mongoose.Schema(
       ref: "Curso",
       required: true,
     },
+
+    activo: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+proyectoCursoSchema.index({ proyectoId: 1, cursoId: 1 }, { unique: true });
 
 export default mongoose.model("ProyectoCurso", proyectoCursoSchema);

@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import Proyecto from "./models/proyecto.model";
+import Curso from "../cursos/models/curso.model";
+import ProyectoCurso from "../proyectoCursos/models/proyectoCurso.model";
 
 export const getProyectos = async (_req: Request, res: Response) => {
   try {
@@ -72,6 +74,20 @@ export const createProyecto = async (req: Request, res: Response) => {
     });
 
     await nuevoProyecto.save();
+
+    const cursos = await Curso.find();
+
+    if (cursos.length > 0) {
+      const relaciones = cursos.map((curso) => ({
+        proyectoId: nuevoProyecto._id,
+        cursoId: curso._id,
+        activo: true,
+      }));
+
+      await ProyectoCurso.insertMany(relaciones, { ordered: false }).catch(
+        () => undefined
+      );
+    }
 
     res.status(201).json({
       message: "Proyecto creado correctamente",
