@@ -4,6 +4,7 @@ import {
   getProyectoById,
   createProyecto,
   updateProyecto,
+  obtenerDetalleProyecto,
 } from "./proyectos.controller";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { authorizeRoles } from "../../middlewares/roles.middleware";
@@ -15,6 +16,13 @@ router.get(
   verifyToken,
   authorizeRoles("director", "pedagogico", "formador"),
   getProyectos
+);
+
+router.get(
+  "/:id/detalle",
+  verifyToken,
+  authorizeRoles("director", "pedagogico", "formador"),
+  obtenerDetalleProyecto
 );
 
 router.get(

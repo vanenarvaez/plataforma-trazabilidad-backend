@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Institucion from "./models/institucion.model";
 import Proyecto from "../proyectos/models/proyecto.model";
+import Docente from "../docentes/models/docente.model";
 
 export const getInstituciones = async (_req: Request, res: Response) => {
   try {
@@ -126,6 +127,35 @@ export const updateInstitucion = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       message: "Error al actualizar la institución",
+      error,
+    });
+  }
+};
+
+export const obtenerDetalleInstitucion = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const institucion = await Institucion.findById(id).populate("proyectoId", "nombre");
+
+    if (!institucion) {
+      return res.status(404).json({
+        message: "Institución no encontrada",
+      });
+    }
+
+    const docentes = await Docente.find({ institucionId: id }).populate(
+      "proyectoId",
+      "nombre"
+    );
+
+    res.status(200).json({
+      institucion,
+      docentes,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al consultar el detalle de la institución",
       error,
     });
   }

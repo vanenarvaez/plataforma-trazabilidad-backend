@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Proyecto from "./models/proyecto.model";
 import Curso from "../cursos/models/curso.model";
 import ProyectoCurso from "../proyectoCursos/models/proyectoCurso.model";
+import Institucion from "../instituciones/models/institucion.model";
 
 export const getProyectos = async (_req: Request, res: Response) => {
   try {
@@ -123,6 +124,34 @@ export const updateProyecto = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       message: "Error al actualizar el proyecto",
+      error,
+    });
+  }
+};
+
+export const obtenerDetalleProyecto = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const proyecto = await Proyecto.findById(id);
+
+    if (!proyecto) {
+      return res.status(404).json({
+        message: "Proyecto no encontrado",
+      });
+    }
+
+    const instituciones = await Institucion.find({
+      proyectoId: id,
+    });
+
+    return res.status(200).json({
+      proyecto,
+      instituciones,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al consultar detalle del proyecto",
       error,
     });
   }

@@ -47,78 +47,184 @@
     <div class="p-4 w-100">
       <h2 class="text-brand fw-bold mb-4">Gestión de docentes</h2>
 
-      <div class="card shadow-sm p-4 mb-4">
-        <h5 class="mb-3 text-brand">Registrar docente</h5>
+      <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+          <div class="card shadow-sm p-4 h-100">
+            <h5 class="mb-3 text-brand">Registrar docente</h5>
 
-        <form id="docenteForm" class="row g-3">
-          <div class="col-md-2">
-            <label class="form-label">Tipo documento</label>
-            <select id="tipoDocumento" class="form-select" required>
-              <option value="CC">CC</option>
-              <option value="TI">TI</option>
-              <option value="CE">CE</option>
-              <option value="Pasaporte">Pasaporte</option>
-            </select>
+            <form id="docenteForm" class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Tipo documento</label>
+                <select id="tipoDocumento" class="form-select" required>
+                  <option value="CC">CC</option>
+                  <option value="TI">TI</option>
+                  <option value="CE">CE</option>
+                  <option value="Pasaporte">Pasaporte</option>
+                </select>
+              </div>
+
+              <div class="col-md-8">
+                <label class="form-label">Número documento</label>
+                <input type="text" id="numeroDocumento" class="form-control" required />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Nombres</label>
+                <input type="text" id="nombres" class="form-control" required />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Apellidos</label>
+                <input type="text" id="apellidos" class="form-control" required />
+              </div>
+
+              <div class="col-md-7">
+                <label class="form-label">Correo</label>
+                <input type="email" id="email" class="form-control" />
+              </div>
+
+              <div class="col-md-5">
+                <label class="form-label">Teléfono</label>
+                <input type="text" id="telefono" class="form-control" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Institución</label>
+                <select id="institucionId" class="form-select" required>
+                  <option value="">Cargando instituciones...</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Proyecto</label>
+                <select id="proyectoId" class="form-select" required>
+                  <option value="">Cargando proyectos...</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 d-flex align-items-end">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="activo" checked />
+                  <label class="form-check-label" for="activo">Activo</label>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div id="mensajeDocente" class="small"></div>
+              </div>
+
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">Guardar docente</button>
+              </div>
+            </form>
           </div>
+        </div>
 
-          <div class="col-md-4">
-            <label class="form-label">Número documento</label>
-            <input type="text" id="numeroDocumento" class="form-control" required />
-          </div>
+        <div class="col-lg-8">
+          <div class="card shadow-sm p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <h5 class="mb-0 text-brand">Resumen de docentes</h5>
+              <button id="btnDescargarCsvDocentes" class="btn btn-outline-success btn-sm" disabled>
+                Descargar CSV
+              </button>
+            </div>
 
-          <div class="col-md-3">
-            <label class="form-label">Nombres</label>
-            <input type="text" id="nombres" class="form-control" required />
-          </div>
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <div class="card border text-center h-100">
+                  <div class="card-body">
+                    <h6>Total registrados</h6>
+                    <h3 id="kpiTotalDocentes">0</h3>
+                  </div>
+                </div>
+              </div>
 
-          <div class="col-md-3">
-            <label class="form-label">Apellidos</label>
-            <input type="text" id="apellidos" class="form-control" required />
-          </div>
+              <div class="col-md-8">
+                <div class="card border h-100">
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label">Proyecto</label>
+                        <select id="proyectoFiltroDocentes" class="form-select">
+                          <option value="">Todos los proyectos</option>
+                        </select>
+                      </div>
 
-          <div class="col-md-4">
-            <label class="form-label">Correo</label>
-            <input type="email" id="email" class="form-control" />
-          </div>
+                      <div class="col-md-6">
+                        <label class="form-label">Buscar docente</label>
+                        <input
+                          type="text"
+                          id="buscadorDocentes"
+                          class="form-control"
+                          placeholder="Nombre o documento"
+                        />
+                      </div>
+                    </div>
 
-          <div class="col-md-3">
-            <label class="form-label">Teléfono</label>
-            <input type="text" id="telefono" class="form-control" />
-          </div>
+                    <div class="small text-primary fw-semibold mt-3">
+                      Filtra por proyecto o busca por nombre y documento para consultar y descargar la base de docentes.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <div class="col-md-5">
-            <label class="form-label">Institución</label>
-            <select id="institucionId" class="form-select" required>
-              <option value="">Cargando instituciones...</option>
-            </select>
-          </div>
+            <div class="row g-4">
+              <div class="col-md-7">
+                <div class="card border p-3 h-100">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <h6 class="mb-0 text-brand">Distribución de docentes por proyecto</h6>
+                    <span id="resumenFiltroDocentes" class="badge text-bg-light border">
+                      Sin resultados cargados
+                    </span>
+                  </div>
+                  <canvas id="graficoDocentesProyecto" height="180"></canvas>
+                </div>
+              </div>
 
-          <div class="col-md-6">
-            <label class="form-label">Proyecto</label>
-            <select id="proyectoId" class="form-select" required>
-              <option value="">Cargando proyectos...</option>
-            </select>
-          </div>
-
-          <div class="col-md-2 d-flex align-items-end">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="activo" checked />
-              <label class="form-check-label" for="activo">Activo</label>
+              <div class="col-md-5">
+                <div class="card border p-3 h-100">
+                  <h6 class="mb-3 text-brand">Resumen del filtro</h6>
+                  <div id="resumenTextoDocentes" class="small text-muted">
+                    Aquí se mostrará el resumen del filtro aplicado.
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div class="col-12">
-            <div id="mensajeDocente" class="small"></div>
-          </div>
-
-          <div class="col-12">
-            <button type="submit" class="btn btn-primary">Guardar docente</button>
-          </div>
-        </form>
+        </div>
       </div>
 
-      <div class="card shadow-sm p-4">
-        <h5 class="mb-3 text-brand">Listado de docentes</h5>
+      <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0 text-brand">Listado de docentes</h5>
+          <button id="btnDescargarCsvDocentesListado" class="btn btn-outline-success btn-sm" disabled>
+            Descargar toda la base CSV
+          </button>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Proyecto</label>
+            <select id="proyectoFiltroListado" class="form-select">
+              <option value="">Todos los proyectos</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Buscar docente</label>
+            <input
+              type="text"
+              id="buscadorListadoDocentes"
+              class="form-control"
+              placeholder="Nombre o documento"
+            />
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button id="btnLimpiarFiltrosListado" class="btn btn-secondary w-100">
+              Limpiar filtros
+            </button>
+          </div>
+        </div>
 
         <div class="table-responsive">
           <table class="table table-bordered table-hover align-middle">
@@ -130,20 +236,92 @@
                 <th>Teléfono</th>
                 <th>Institución</th>
                 <th>Proyecto</th>
+                <th>Estado</th>
               </tr>
             </thead>
             <tbody id="tablaDocentes">
               <tr>
-                <td colspan="6" class="text-center">Cargando docentes...</td>
+                <td colspan="7" class="text-center">Cargando docentes...</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      <div class="card shadow-sm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="text-brand mb-0">Consulta detallada por docente</h5>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-8">
+            <label class="form-label">Buscar docente</label>
+            <input
+              type="text"
+              id="buscadorDocenteDetalle"
+              class="form-control"
+              list="listaDocentesDetalle"
+              placeholder="Escribe nombre o documento"
+            />
+            <datalist id="listaDocentesDetalle"></datalist>
+            <input type="hidden" id="docenteDetalleId" />
+          </div>
+
+          <div class="col-md-4 d-flex align-items-end">
+            <button id="btnConsultarDocente" class="btn btn-primary w-100">
+              Consultar detalle
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive mb-3">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Institución</th>
+                <th>Proyecto</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaDetalleDocente">
+              <tr>
+                <td colspan="7" class="text-center">
+                  Selecciona un docente para ver el detalle
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Proyecto</th>
+                <th>Curso</th>
+                <th>% asistencia</th>
+                <th>Certificado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaCursosDocente">
+              <tr>
+                <td colspan="4" class="text-center">
+                  Consulta un docente para ver sus cursos
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- Scripts al final -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../js/layout.js"></script>
   <script src="../js/docentes.js"></script>
   <script>

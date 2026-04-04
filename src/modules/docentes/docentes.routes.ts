@@ -4,6 +4,7 @@ import {
   listarDocentes,
   obtenerDocentePorId,
   actualizarDocente,
+  obtenerFichaDocente,
 } from "./docentes.controller";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { authorizeRoles } from "../../middlewares/roles.middleware";
@@ -18,14 +19,31 @@ router.get(
 );
 
 router.get(
+  "/:id/ficha",
+  verifyToken,
+  authorizeRoles("pedagogico", "formador", "director"),
+  obtenerFichaDocente
+);
+
+router.get(
   "/:id",
   verifyToken,
   authorizeRoles("pedagogico", "formador", "director"),
   obtenerDocentePorId
 );
 
-router.put("/:id", verifyToken, authorizeRoles("pedagogico"), actualizarDocente);
+router.put(
+  "/:id",
+  verifyToken,
+  authorizeRoles("pedagogico"),
+  actualizarDocente
+);
 
-router.post("/", verifyToken, authorizeRoles("pedagogico"), crearDocente);
+router.post(
+  "/",
+  verifyToken,
+  authorizeRoles("pedagogico"),
+  crearDocente
+);
 
 export default router;

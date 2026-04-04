@@ -106,7 +106,60 @@
         </form>
       </div>
 
-      <div class="card shadow-sm p-4">
+      <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h5 class="mb-0 text-brand">Resumen de instituciones</h5>
+          <button id="btnDescargarCsvInstituciones" class="btn btn-outline-success btn-sm" disabled>
+            Descargar CSV
+          </button>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="card border text-center h-100">
+              <div class="card-body">
+                <h6>Total registradas</h6>
+                <h3 id="kpiTotalInstituciones">0</h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-8">
+            <div class="card border h-100">
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">Proyecto</label>
+                    <select id="proyectoFiltroInstituciones" class="form-select">
+                      <option value="">Todos los proyectos</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-5">
+                    <label class="form-label">Buscar institución</label>
+                    <input
+                      type="text"
+                      id="buscadorInstituciones"
+                      class="form-control"
+                      placeholder="Nombre o código DANE"
+                    />
+                  </div>
+
+                  <div class="col-md-3 d-flex align-items-end">
+                    <button id="btnLimpiarFiltrosInstituciones" class="btn btn-secondary w-100" type="button">
+                      Limpiar filtros
+                    </button>
+                  </div>
+                </div>
+
+                <div class="small text-primary fw-semibold mt-3">
+                  Filtra por proyecto o busca por nombre y código DANE para consultar y descargar la base de instituciones.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <h5 class="mb-3 text-brand">Listado de instituciones</h5>
 
         <div class="table-responsive">
@@ -130,10 +183,77 @@
           </table>
         </div>
       </div>
+
+      <div class="card shadow-sm p-4 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="text-brand mb-0">Consulta detallada por institución</h5>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-8">
+            <label class="form-label">Buscar institución</label>
+            <input
+              type="text"
+              id="buscadorInstitucionDetalle"
+              class="form-control"
+              list="listaInstituciones"
+              placeholder="Nombre o código DANE"
+            />
+            <datalist id="listaInstituciones"></datalist>
+            <input type="hidden" id="institucionDetalleId" />
+          </div>
+
+          <div class="col-md-4 d-flex align-items-end">
+            <button id="btnConsultarInstitucion" class="btn btn-primary w-100" type="button">
+              Consultar detalle
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive mb-3">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Código DANE</th>
+                <th>Municipio</th>
+                <th>Proyecto</th>
+              </tr>
+            </thead>
+            <tbody id="tablaDetalleInstitucion">
+              <tr>
+                <td colspan="4" class="text-center">
+                  Selecciona una institución
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Proyecto</th>
+              </tr>
+            </thead>
+            <tbody id="tablaDocentesInstitucion">
+              <tr>
+                <td colspan="4" class="text-center">
+                  Consulta una institución para ver sus docentes
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- Scripts SIEMPRE al final -->
   <script src="../js/layout.js"></script>
   <script src="../js/instituciones.js"></script>
   <script>
