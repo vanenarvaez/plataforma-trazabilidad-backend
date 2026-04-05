@@ -30,6 +30,7 @@ const tipoFormacion = document.getElementById("tipoFormacion");
 const descripcionCurso = document.getElementById("descripcionCurso");
 const mensajeCurso = document.getElementById("mensajeCurso");
 const btnLimpiarCurso = document.getElementById("btnLimpiarCurso");
+const bloqueCrearCurso = document.getElementById("bloqueCrearCurso");
 
 const btnConsultarConsolidado = document.getElementById("btnConsultarConsolidado");
 const btnLimpiarFiltros = document.getElementById("btnLimpiarFiltros");
@@ -901,9 +902,20 @@ btnConsultarDetalleDocente.addEventListener("click", consultarDetalleDocente);
 btnDescargarCsvDetalleDocente.addEventListener("click", descargarCsvDetalle);
 btnLimpiarCurso.addEventListener("click", limpiarFormularioCurso);
 
+function aplicarRestriccionesPorRolAsistencias() {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  if (!user) return;
+
+  if (user.rol === "formador" && bloqueCrearCurso) {
+    bloqueCrearCurso.style.display = "none";
+  }
+}
+
 async function inicializar() {
   limpiarVistaConsolidado();
   limpiarDetalleDocente();
+  aplicarRestriccionesPorRolAsistencias();
 
   try {
     await Promise.all([

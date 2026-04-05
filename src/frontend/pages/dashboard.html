@@ -1,93 +1,153 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard</title>
+  <title>Dashboard interno</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
-
 <body>
 
-  <!-- NAVBAR -->
   <nav class="navbar px-4 py-3" style="background-color: var(--color-primary);">
-    <div class="d-flex align-items-center gap-3">
-      <img src="../images/logo1morado.png" style="height:55px; object-fit: contain;" />
-      <span class="text-white fw-bold">Plataforma de Trazabilidad</span>
-    </div>
+  <div class="d-flex align-items-center gap-3">
+    <img
+      src="../images/logo1morado.png"
+      alt="Aulas Amigas"
+      style="height:55px; object-fit: contain;"
+    />
+    <span class="text-white fw-bold">Plataforma de Trazabilidad</span>
+  </div>
 
+  <div class="d-flex align-items-center gap-3">
     <div class="text-white text-end me-3">
       <div id="nombreUsuario" class="fw-semibold"></div>
       <small id="rolUsuario"></small>
     </div>
 
     <button class="btn btn-light btn-sm" onclick="logout()">Cerrar sesión</button>
-  </nav>
+  </div>
+</nav>
 
   <div class="d-flex">
-
-    <!-- SIDEBAR -->
     <div class="p-3" style="width: 250px; background: var(--color-gray); min-height: 100vh;">
-      <h6 class="text-brand fw-bold mb-3">Menú</h6>
+  <h6 class="text-brand fw-bold mb-3">Menú</h6>
 
-      <a href="dashboard.html" class="sidebar-link active"
-        data-roles="admin,director,pedagogico,formador,comercial">Dashboard</a>
-      <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
-      <a href="instituciones.html" class="sidebar-link" data-roles="admin,director">Instituciones</a>
-      <a href="docentes.html" class="sidebar-link" data-roles="admin,pedagogico,formador">Docentes</a>
-      <a href="asistencias.html" class="sidebar-link" data-roles="admin,pedagogico,formador">Asistencias</a>
-      <a href="encuestas.html" class="sidebar-link" data-roles="admin,pedagogico">Encuestas</a>
-    </div>
+  <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador,comercial">Dashboard</a>
+  <a href="usuarios.html" class="sidebar-link" data-roles="admin">Usuarios</a>
+  <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
+  <a href="instituciones.html" class="sidebar-link" data-roles="admin,director,pedagogico">Instituciones</a>
+  <a href="docentes.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Docentes</a>
+  <a href="asistencias.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Asistencias</a>
+  <a href="encuestas.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Encuestas</a>
+</div>
 
-    <!-- CONTENIDO -->
     <div class="p-4 w-100">
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 class="text-brand fw-bold mb-0">Dashboard interno</h2>
 
-      <h2 class="text-brand fw-bold mb-4">Bienvenido</h2>
+        <div style="min-width: 320px;">
+          <label class="form-label mb-1">Proyecto</label>
+          <select id="filtroProyectoDashboard" class="form-select">
+            <option value="">Todos los proyectos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="small text-primary fw-semibold mb-4">
+        Consolidado interno de certificación y avance general de encuestas por proyecto o de forma global.
+      </div>
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm border">
+            <h6>Total docentes</h6>
+            <h3 id="kpiTotalDocentes">0</h3>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm border">
+            <h6>Certificados</h6>
+            <h3 id="kpiCertificados">0</h3>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm border">
+            <h6>Pendientes certificación</h6>
+            <h3 id="kpiPendientesCertificacion">0</h3>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm border">
+            <h6>Caracterización respondida</h6>
+            <h3 id="kpiCaracterizacionRespondida">0</h3>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm border">
+            <h6>Caracterización pendiente</h6>
+            <h3 id="kpiCaracterizacionPendiente">0</h3>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm border">
+            <h6>Diagnóstica respondida</h6>
+            <h3 id="kpiDiagnosticaRespondida">0</h3>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm border">
+            <h6>Diagnóstica pendiente</h6>
+            <h3 id="kpiDiagnosticaPendiente">0</h3>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm border">
+            <h6>Ámbito consultado</h6>
+            <h6 id="kpiProyectoActual" class="mt-2 mb-0 text-brand">Todos los proyectos</h6>
+          </div>
+        </div>
+      </div>
 
       <div class="row g-4">
-
-        <div class="col-md-3">
-          <div class="card p-3 shadow-sm">
-            <h6>Proyectos</h6>
-            <h3 id="totalProyectos">0</h3>
+        <div class="col-lg-4">
+          <div class="card p-4 shadow-sm border h-100">
+            <h5 class="text-brand mb-3">Certificación</h5>
+            <canvas id="graficoCertificacion" height="220"></canvas>
           </div>
         </div>
 
-        <div class="col-md-3">
-          <div class="card p-3 shadow-sm">
-            <h6>Docentes</h6>
-            <h3 id="totalDocentes">0</h3>
+        <div class="col-lg-4">
+          <div class="card p-4 shadow-sm border h-100">
+            <h5 class="text-brand mb-3">Encuesta de caracterización</h5>
+            <canvas id="graficoCaracterizacion" height="220"></canvas>
           </div>
         </div>
 
-        <div class="col-md-3">
-          <div class="card p-3 shadow-sm">
-            <h6>Instituciones</h6>
-            <h3 id="totalInstituciones">0</h3>
+        <div class="col-lg-4">
+          <div class="card p-4 shadow-sm border h-100">
+            <h5 class="text-brand mb-3">Encuesta diagnóstica</h5>
+            <canvas id="graficoDiagnostica" height="220"></canvas>
           </div>
         </div>
-
-        <div class="col-md-3">
-          <div class="card p-3 shadow-sm">
-            <h6>Asistencias</h6>
-            <h3 id="totalAsistencias">0</h3>
-          </div>
-        </div>
-
       </div>
 
     </div>
-
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../js/layout.js"></script>
   <script src="../js/dashboard.js"></script>
   <script>
     aplicarPermisosPorRol();
   </script>
 </body>
-
 </html>

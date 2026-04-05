@@ -7,7 +7,6 @@ import Encuesta from "../encuestas/models/encuesta.model";
 import Certificado from "../certificados/models/certificado.model";
 import ProyectoCurso from "../proyectoCursos/models/proyectoCurso.model";
 import Asistencia from "../asistencias/models/asistencia.model";
-import Curso from "../cursos/models/curso.model";
 
 export const obtenerIndicadoresPublicos = async (
   req: Request,
@@ -309,6 +308,148 @@ export const obtenerIndicadoresInternosPorProyecto = async (
   } catch (error) {
     return res.status(500).json({
       message: "Error al obtener indicadores internos por proyecto",
+      error,
+    });
+  }
+};
+
+export const obtenerDashboardInterno = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { proyectoId } = req.query;
+
+    const filtroDocentes: any = {};
+    let proyectoNombre = "Todos los proyectos";
+
+    if (proyectoId && String(proyectoId).trim() !== "") {
+      filtroDocentes.proyectoId = proyectoId;
+      const proyecto = await Proyecto.findById(proyectoId).select("nombre");
+      proyectoNombre = proyecto?.nombre || "Proyecto";
+    }
+
+    const docentes = await Docente.find(filtroDocentes).select(
+      "_id proyectoId nombres apellidos numeroDocumento"
+    );
+
+    const totalDocentes = docentes.length;
+    const docentesIds = docentes.map((d: any) => d._id);
+
+    if (!totalDocentes) {
+      return res.status(200).json({
+        filtro: {
+          proyectoId: proyectoId || null,
+          proyectoNombre,
+        },
+        indicadores: {
+          totalDocentes: 0,
+          certificados: 0,
+          pendientesCertificacion: 0,
+          caracterizacionRespondida: 0,
+          caracterizacionPendiente: 0,
+          diagnosticaRespondida: 0,
+          diagnosticaPendiente: 0,
+        },
+        graficos: {
+          certificacion: [
+            { nombre: "Certificados", valor: 0 },
+            { nombre: "Pendientes", valor: 0 },
+          ],
+          caracterizacion: [
+            { nombre: "Respondida", valor: 0 },
+            { nombre: "Pendiente", valor: 0 },
+          ],
+          diagnostica: [
+            { nombre: "Respondida", valor: 0 },
+            { nombre: "Pendiente", valor: 0 },
+          ],
+        },
+      });
+    }
+
+    const certificados = await Certificado.find({
+      docenteId: { $in: docentesIds },
+    }).select("docenteId");
+
+    const docentesCertificados = new Set(
+      certificados.map((c: any) => String(c.docenteId))
+    );
+    const certificadosCount = docentesCertificados.size;
+    const pendientesCertificacion = totalDocentes - certificadosCount;
+
+    const encuestasCaracterizacion = await Encuesta.find({
+      tipo: "caracterizacion",
+    }).select("_id");
+
+    const encuestasDiagnostica = await Encuesta.find({
+      tipo: "diagnostica",
+    }).select("_id");
+
+    let respuestasCaracterizacion: any[] = [];
+    let respuestasDiagnostica: any[] = [];
+
+    if (encuestasCaracterizacion.length > 0) {
+      respuestasCaracterizacion = await RespuestaEncuesta.find({
+        encuestaId: { $in: encuestasCaracterizacion.map((e: any) => e._id) },
+        docenteId: { $in: docentesIds },
+      }).select("docenteId");
+    }
+
+    if (encuestasDiagnostica.length > 0) {
+      respuestasDiagnostica = await RespuestaEncuesta.find({
+        encuestaId: { $in: encuestasDiagnostica.map((e: any) => e._id) },
+        docenteId: { $in: docentesIds },
+      }).select("docenteId");
+    }
+
+    const docentesCaracterizacion = new Set(
+      respuestasCaracterizacion.map((r: any) => String(r.docenteId))
+    );
+
+    const docentesDiagnostica = new Set(
+      respuestasDiagnostica.map((r: any) => String(r.docenteId))
+    );
+
+    const caracterizacionRespondida = docentesCaracterizacion.size;
+    const caracterizacionPendiente =
+      totalDocentes - caracterizacionRespondida;
+
+    const diagnosticaRespondida = docentesDiagnostica.size;
+    const diagnosticaPendiente = totalDocentes - diagnosticaRespondida;
+
+    return res.status(200).json({
+      filtro: {
+        proyectoId: proyectoId || null,
+        proyectoNombre,
+      },
+      indicadores: {
+        totalDocentes,
+        certificados: certificadosCount,
+        pendientesCertificacion,
+        caracterizacionRespondida,
+        caracterizacionPendiente,
+        diagnosticaRespondida,
+        diagnosticaPendiente,
+      },
+      graficos: {
+        certificacion: [
+          { nombre: "Certificados", valor: certificadosCount },
+          { nombre: "Pendientes", valor: pendientesCertificacion },
+        ],
+        caracterizacion: [
+          { nombre: "Respondida", valor: caracterizacionRespondida },
+          { nombre: "Pendiente", valor: caracterizacionPendiente },
+        ],
+        diagnostica: [
+          { nombre: "Respondida", valor: diagnosticaRespondida },
+          { nombre: "Pendiente", valor: diagnosticaPendiente },
+        ],
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al obtener dashboard interno",
       error,
     });
   }

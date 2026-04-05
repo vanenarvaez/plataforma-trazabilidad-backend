@@ -21,19 +21,35 @@ function aplicarPermisosPorRol() {
   const rolUsuario = document.getElementById("rolUsuario");
 
   if (nombreUsuario) {
-    nombreUsuario.textContent = user.nombre || "Usuario";
+    nombreUsuario.textContent =
+      user.nombre ||
+      `${user.nombres || ""} ${user.apellidos || ""}`.trim() ||
+      "Usuario";
   }
 
   if (rolUsuario) {
-    rolUsuario.textContent = user.rol || "Sin rol";
+    const mapaRoles = {
+      admin: "Administrador",
+      director: "Director",
+      pedagogico: "Líder pedagógico",
+      formador: "Formador",
+      comercial: "Comercial",
+    };
+
+    rolUsuario.textContent = mapaRoles[user.rol] || user.rol || "Sin rol";
   }
 
   const links = document.querySelectorAll("[data-roles]");
 
   links.forEach((link) => {
-    const rolesPermitidos = link.dataset.roles.split(",").map((r) => r.trim());
+    const rolesPermitidos = link.dataset.roles
+      .split(",")
+      .map((r) => r.trim());
+
     if (!rolesPermitidos.includes(user.rol)) {
       link.style.display = "none";
+    } else {
+      link.style.display = "block";
     }
   });
 }

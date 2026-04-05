@@ -14,35 +14,38 @@
 <body>
 
   <nav class="navbar px-4 py-3" style="background-color: var(--color-primary);">
-    <div class="d-flex align-items-center gap-3">
-      <img
-        src="../images/logo1morado.png"
-        alt="Aulas Amigas"
-        style="height:55px; object-fit: contain;"
-      />
-      <span class="text-white fw-bold">Plataforma de Trazabilidad</span>
+  <div class="d-flex align-items-center gap-3">
+    <img
+      src="../images/logo1morado.png"
+      alt="Aulas Amigas"
+      style="height:55px; object-fit: contain;"
+    />
+    <span class="text-white fw-bold">Plataforma de Trazabilidad</span>
+  </div>
+
+  <div class="d-flex align-items-center gap-3">
+    <div class="text-white text-end me-3">
+      <div id="nombreUsuario" class="fw-semibold"></div>
+      <small id="rolUsuario"></small>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
-      <div class="text-white text-end me-3">
-        <div id="nombreUsuario" class="fw-semibold"></div>
-        <small id="rolUsuario"></small>
-      </div>
-      <button class="btn btn-light btn-sm" onclick="logout()">Cerrar sesión</button>
-    </div>
-  </nav>
+    <button class="btn btn-light btn-sm" onclick="logout()">Cerrar sesión</button>
+  </div>
+</nav>
 
   <div class="d-flex">
-    <div class="p-3" style="width: 250px; background: var(--color-gray); min-height: 100vh;">
-      <h6 class="text-brand fw-bold mb-3">Menú</h6>
 
-      <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,docente">Dashboard</a>
-      <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
-      <a href="instituciones.html" class="sidebar-link active" data-roles="admin,director">Instituciones</a>
-      <a href="docentes.html" class="sidebar-link" data-roles="admin,director">Docentes</a>
-      <a href="asistencias.html" class="sidebar-link" data-roles="admin,director,docente">Asistencias</a>
-      <a href="encuestas.html" class="sidebar-link" data-roles="admin,director,docente">Encuestas</a>
-    </div>
+  <div class="p-3" style="width: 250px; background: var(--color-gray); min-height: 100vh;">
+  <h6 class="text-brand fw-bold mb-3">Menú</h6>
+
+  <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador,comercial">Dashboard</a>
+  <a href="usuarios.html" class="sidebar-link" data-roles="admin">Usuarios</a>
+  <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
+  <a href="instituciones.html" class="sidebar-link" data-roles="admin,director,pedagogico">Instituciones</a>
+  <a href="docentes.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Docentes</a>
+  <a href="asistencias.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Asistencias</a>
+  <a href="encuestas.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Encuestas</a>
+</div>
 
     <div class="p-4 w-100">
       <div class="d-flex justify-content-between align-items-center mb-4">
