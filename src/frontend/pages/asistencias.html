@@ -1,51 +1,47 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Asistencias</title>
 
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
-<body>
-  
-<nav class="navbar px-4 py-3" style="background-color: var(--color-primary);">
-  <div class="d-flex align-items-center gap-3">
-    <img
-      src="../images/logo1morado.png"
-      alt="Aulas Amigas"
-      style="height:55px; object-fit: contain;"
-    />
-    <span class="text-white fw-bold">Plataforma de Trazabilidad</span>
-  </div>
 
-  <div class="d-flex align-items-center gap-3">
-    <div class="text-white text-end me-3">
-      <div id="nombreUsuario" class="fw-semibold"></div>
-      <small id="rolUsuario"></small>
+<body>
+
+  <nav class="navbar px-4 py-3" style="background-color: var(--color-primary);">
+    <div class="d-flex align-items-center gap-3">
+      <img src="../images/logo5blanco.png" alt="Aulas Amigas" style="height:55px; object-fit: contain;" />
+      <span class="text-white fw-bold position-absolute top-50 start-50 translate-middle">Plataforma de Trazabilidad</span>
     </div>
 
-    <button class="btn btn-light btn-sm" onclick="logout()">Cerrar sesión</button>
-  </div>
-</nav>
+    <div class="d-flex align-items-center gap-3">
+      <div class="text-white text-end me-3">
+        <div id="nombreUsuario" class="fw-semibold"></div>
+        <small id="rolUsuario"></small>
+      </div>
+
+      <button class="btn btn-light btn-sm" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </nav>
 
   <div class="d-flex">
-    
-  <div class="p-3" style="width: 250px; background: var(--color-gray); min-height: 100vh;">
-  <h6 class="text-brand fw-bold mb-3">Menú</h6>
 
-  <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador,comercial">Dashboard</a>
-  <a href="usuarios.html" class="sidebar-link" data-roles="admin">Usuarios</a>
-  <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
-  <a href="instituciones.html" class="sidebar-link" data-roles="admin,director,pedagogico">Instituciones</a>
-  <a href="docentes.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Docentes</a>
-  <a href="asistencias.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Asistencias</a>
-  <a href="encuestas.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Encuestas</a>
-</div>
+    <div class="p-3" style="width: 250px; background: var(--color-gray); min-height: 100vh;">
+      <h6 class="text-brand fw-bold mb-3">Menú</h6>
+
+      <a href="dashboard.html" class="sidebar-link"
+        data-roles="admin,director,pedagogico,formador,comercial">Dashboard</a>
+      <a href="usuarios.html" class="sidebar-link" data-roles="admin">Usuarios</a>
+      <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
+      <a href="instituciones.html" class="sidebar-link" data-roles="admin,director,pedagogico">Instituciones</a>
+      <a href="docentes.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Docentes</a>
+      <a href="asistencias.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Asistencias</a>
+      <a href="encuestas.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Encuestas</a>
+    </div>
 
     <div class="p-4 w-100">
       <h2 class="text-brand fw-bold mb-4">Gestión de asistencias</h2>
@@ -72,16 +68,9 @@
 
               <div class="col-12">
                 <label class="form-label">Docente</label>
-                <input
-                  type="text"
-                  id="buscadorDocenteRegistro"
-                  class="form-control"
-                  placeholder="Escribe nombre o cédula"
-                  list="listaDocentesRegistro"
-                  autocomplete="off"
-                  disabled
-                  required
-                />
+                <input type="text" id="buscadorDocenteRegistro" class="form-control"
+                  placeholder="Escribe nombre o cédula" list="listaDocentesRegistro" autocomplete="off" disabled
+                  required />
                 <datalist id="listaDocentesRegistro"></datalist>
                 <input type="hidden" id="docenteIdRegistro" />
                 <div class="form-text">
@@ -124,26 +113,12 @@
 
               <div class="col-md-6">
                 <label class="form-label">Número de módulos</label>
-                <input
-                  type="number"
-                  id="numeroModulos"
-                  class="form-control"
-                  min="1"
-                  placeholder="Ej. 4"
-                  required
-                />
+                <input type="number" id="numeroModulos" class="form-control" min="1" placeholder="Ej. 4" required />
               </div>
 
               <div class="col-md-6">
                 <label class="form-label">Duración en horas</label>
-                <input
-                  type="number"
-                  id="duracionHoras"
-                  class="form-control"
-                  min="1"
-                  placeholder="Ej. 40"
-                  required
-                />
+                <input type="number" id="duracionHoras" class="form-control" min="1" placeholder="Ej. 40" required />
               </div>
 
               <div class="col-12">
@@ -180,7 +155,8 @@
               <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-primary btn-sm" id="btnConsultarConsolidado">Consultar</button>
                 <button class="btn btn-outline-secondary btn-sm" id="btnLimpiarFiltros">Limpiar filtros</button>
-                <button class="btn btn-outline-success btn-sm" id="btnDescargarCsvAsistencias" disabled>Descargar CSV</button>
+                <button class="btn btn-outline-success btn-sm" id="btnDescargarCsvAsistencias" disabled>Descargar
+                  CSV</button>
               </div>
             </div>
 
@@ -293,6 +269,35 @@
         </div>
       </div>
 
+      <div id="bloqueGestionCursosProyecto" class="card shadow-sm p-4 mb-4">
+        <h5 class="mb-3 text-brand">Activar / desactivar cursos por proyecto</h5>
+
+        <div class="mb-3">
+          <label class="form-label">Proyecto</label>
+          <select id="proyectoCursosAdmin" class="form-select">
+            <option value="">Seleccione un proyecto</option>
+          </select>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Curso</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tablaCursosProyecto">
+              <tr>
+                <td colspan="3" class="text-center">Seleccione un proyecto</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
       <div class="card shadow-sm p-4">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <h5 class="mb-0 text-brand">Consulta detallada por docente</h5>
@@ -345,4 +350,5 @@
     aplicarPermisosPorRol();
   </script>
 </body>
+
 </html>

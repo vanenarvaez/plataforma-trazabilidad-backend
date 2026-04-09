@@ -5,6 +5,7 @@ import {
   createUser,
   updateUser,
   changeUserPassword,
+  resetearPassword,
 } from "./users.controller";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { authorizeRoles } from "../../middlewares/roles.middleware";
@@ -19,6 +20,18 @@ router.post("/", verifyToken, authorizeRoles("admin"), createUser);
 
 router.put("/:id", verifyToken, authorizeRoles("admin"), updateUser);
 
-router.put("/:id/password", verifyToken, authorizeRoles("admin"), changeUserPassword);
+router.put(
+  "/:id/password",
+  verifyToken,
+  authorizeRoles("admin"),
+  changeUserPassword
+);
+
+router.patch(
+  "/:id/reset-password",
+  verifyToken,
+  authorizeRoles("admin"),
+  resetearPassword
+);
 
 export default router;

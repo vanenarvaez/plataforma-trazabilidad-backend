@@ -8,12 +8,128 @@ import Certificado from "../certificados/models/certificado.model";
 import ProyectoCurso from "../proyectoCursos/models/proyectoCurso.model";
 import Asistencia from "../asistencias/models/asistencia.model";
 
+function normalizarRespuesta(valor: any) {
+  if (Array.isArray(valor)) return valor.map((v) => String(v));
+  return String(valor);
+}
+
+function contarValores(
+  respuestas: any[],
+  numeroPregunta: number,
+  tipoRespuesta?: string
+) {
+  const conteo: Record<string, number> = {};
+  let basePregunta = 0;
+
+  respuestas.forEach((registro: any) => {
+    const item = (registro.respuestas || []).find(
+      (p: any) => Number(p.numeroPregunta) === Number(numeroPregunta)
+    );
+
+    if (!item) return;
+
+    basePregunta += 1;
+
+    const respuesta = item.respuesta;
+
+    if (Array.isArray(respuesta)) {
+      respuesta.forEach((valor: any) => {
+        const key = String(valor);
+        conteo[key] = (conteo[key] || 0) + 1;
+      });
+    } else {
+      const key = String(respuesta);
+      conteo[key] = (conteo[key] || 0) + 1;
+    }
+  });
+
+  return {
+    basePregunta,
+    resultados: Object.entries(conteo).map(([opcion, cantidad]) => ({
+      opcion,
+      cantidad,
+      porcentaje:
+        basePregunta > 0
+          ? Number(((Number(cantidad) / basePregunta) * 100).toFixed(1))
+          : 0,
+    })),
+  };
+}
+
+function calcularPromedioLikert(respuestas: any[], numeroPregunta: number) {
+  let suma = 0;
+  let total = 0;
+
+  respuestas.forEach((registro: any) => {
+    const item = (registro.respuestas || []).find(
+      (p: any) => Number(p.numeroPregunta) === Number(numeroPregunta)
+    );
+
+    if (!item || item.respuesta === undefined || item.respuesta === null) return;
+
+    const texto = String(item.respuesta).trim();
+    const match = texto.match(/^(\d+)/);
+    const numero = match ? Number(match[1]) : Number(texto);
+
+    if (!isNaN(numero)) {
+      suma += numero;
+      total += 1;
+    }
+  });
+
+  return total > 0 ? Number((suma / total).toFixed(2)) : null;
+}
+
+function agruparPreguntasPorBloque(encuesta: any, respuestas: any[]) {
+  const bloquesMap: Record<
+    string,
+    {
+      nombreBloque: string;
+      preguntas: any[];
+    }
+  > = {};
+
+  (encuesta?.preguntas || []).forEach((pregunta: any) => {
+    const nombreBloque = pregunta.bloque?.trim() || "Sin bloque";
+
+    if (!bloquesMap[nombreBloque]) {
+      bloquesMap[nombreBloque] = {
+        nombreBloque,
+        preguntas: [],
+      };
+    }
+
+    const conteo = contarValores(
+      respuestas,
+      pregunta.numero,
+      pregunta.tipoRespuesta
+    );
+
+    const promedio =
+      pregunta.tipoRespuesta === "likert"
+        ? calcularPromedioLikert(respuestas, pregunta.numero)
+        : null;
+
+    bloquesMap[nombreBloque].preguntas.push({
+      numero: pregunta.numero,
+      texto: pregunta.texto,
+      tipoRespuesta: pregunta.tipoRespuesta,
+      bloque: nombreBloque,
+      basePregunta: conteo.basePregunta,
+      promedio,
+      resultados: conteo.resultados,
+    });
+  });
+
+  return Object.values(bloquesMap);
+}
+
 export const obtenerIndicadoresPublicos = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const { genero } = req.query;
+    const { genero, edad, zona } = req.query;
 
     const proyectos = await Proyecto.find();
     const instituciones = await Institucion.find();
@@ -21,7 +137,6 @@ export const obtenerIndicadoresPublicos = async (
 
     const totalProyectos = proyectos.length;
     const totalInstituciones = instituciones.length;
-    const totalDocentes = docentes.length;
 
     const municipiosUnicos = new Set(
       instituciones.map((i: any) => i.municipio).filter(Boolean)
@@ -32,10 +147,10 @@ export const obtenerIndicadoresPublicos = async (
       codigo: { $in: ["CAR-INIC-01", "SATIS-GRAL-01"] },
     });
 
-    const encuestaCaracterizacion = encuestas.find(
+    const encuestaCaracterizacion: any = encuestas.find(
       (e: any) => e.codigo === "CAR-INIC-01"
     );
-    const encuestaSatisfaccion = encuestas.find(
+    const encuestaSatisfaccion: any = encuestas.find(
       (e: any) => e.codigo === "SATIS-GRAL-01"
     );
 
@@ -54,134 +169,116 @@ export const obtenerIndicadoresPublicos = async (
       }).populate("docenteId", "nombres apellidos numeroDocumento");
     }
 
-    let docentesFiltradosIds: string[] | null = null;
+    // Opciones disponibles para filtros principales
+    const generoOpciones = Array.from(
+      new Set(
+        respuestasCaracterizacion
+          .map((r: any) =>
+            (r.respuestas || []).find((p: any) => Number(p.numeroPregunta) === 2)?.respuesta
+          )
+          .filter(Boolean)
+          .map((v: any) => String(v))
+      )
+    );
 
-    if (genero && encuestaCaracterizacion) {
-      const respuestasGenero = respuestasCaracterizacion.filter((r: any) => {
-        const pGenero = r.respuestas?.find(
+    const edadOpciones = Array.from(
+      new Set(
+        respuestasCaracterizacion
+          .map((r: any) =>
+            (r.respuestas || []).find((p: any) => Number(p.numeroPregunta) === 1)?.respuesta
+          )
+          .filter(Boolean)
+          .map((v: any) => String(v))
+      )
+    );
+
+    const zonaOpciones = Array.from(
+      new Set(
+        respuestasCaracterizacion
+          .map((r: any) =>
+            (r.respuestas || []).find((p: any) => Number(p.numeroPregunta) === 4)?.respuesta
+          )
+          .filter(Boolean)
+          .map((v: any) => String(v))
+      )
+    );
+
+    // Filtrado principal de caracterización
+    const respuestasCaracterizacionFiltradas = respuestasCaracterizacion.filter(
+      (registro: any) => {
+        const preguntaGenero = (registro.respuestas || []).find(
           (p: any) => Number(p.numeroPregunta) === 2
-        );
-        return pGenero && pGenero.respuesta === genero;
-      });
+        )?.respuesta;
 
-      docentesFiltradosIds = respuestasGenero.map((r: any) =>
-        String(r.docenteId?._id || r.docenteId)
-      );
+        const preguntaEdad = (registro.respuestas || []).find(
+          (p: any) => Number(p.numeroPregunta) === 1
+        )?.respuesta;
 
-      respuestasCaracterizacion = respuestasCaracterizacion.filter((r: any) =>
-        docentesFiltradosIds?.includes(String(r.docenteId?._id || r.docenteId))
-      );
+        const preguntaZona = (registro.respuestas || []).find(
+          (p: any) => Number(p.numeroPregunta) === 4
+        )?.respuesta;
 
-      respuestasSatisfaccion = respuestasSatisfaccion.filter((r: any) =>
-        docentesFiltradosIds?.includes(String(r.docenteId?._id || r.docenteId))
-      );
-    }
+        const cumpleGenero = genero ? String(preguntaGenero) === String(genero) : true;
+        const cumpleEdad = edad ? String(preguntaEdad) === String(edad) : true;
+        const cumpleZona = zona ? String(preguntaZona) === String(zona) : true;
 
-    const contarRespuestas = (respuestas: any[], numeroPregunta: number) => {
-      const conteo: Record<string, number> = {};
+        return cumpleGenero && cumpleEdad && cumpleZona;
+      }
+    );
 
-      respuestas.forEach((r: any) => {
-        const pregunta = r.respuestas?.find(
-          (p: any) => Number(p.numeroPregunta) === numeroPregunta
-        );
-
-        if (!pregunta) return;
-
-        if (Array.isArray(pregunta.respuesta)) {
-          pregunta.respuesta.forEach((valor: string) => {
-            conteo[valor] = (conteo[valor] || 0) + 1;
-          });
-        } else {
-          conteo[pregunta.respuesta] = (conteo[pregunta.respuesta] || 0) + 1;
-        }
-      });
-
-      return conteo;
-    };
-
-    const generoData = contarRespuestas(respuestasCaracterizacion, 2);
-    const edadData = contarRespuestas(respuestasCaracterizacion, 1);
-    const formacionData = contarRespuestas(respuestasCaracterizacion, 3);
-
-    const promediarLikert = (respuestas: any[], numeroPregunta: number) => {
-      let suma = 0;
-      let total = 0;
-
-      respuestas.forEach((r: any) => {
-        const pregunta = r.respuestas?.find(
-          (p: any) => Number(p.numeroPregunta) === numeroPregunta
-        );
-
-        if (!pregunta || !pregunta.respuesta) return;
-
-        const valor = String(pregunta.respuesta).trim().charAt(0);
-        const numero = Number(valor);
-
-        if (!isNaN(numero)) {
-          suma += numero;
-          total += 1;
-        }
-      });
-
-      return total > 0 ? Number((suma / total).toFixed(2)) : 0;
-    };
-
-    const textosSatisfaccion: Record<number, string> = {
-      1: "Estructura del curso en plataforma",
-      2: "Actividades propuestas",
-      3: "Contenido abordado",
-      4: "Recursos y tutoriales compartidos",
-      5: "Dominio del tema del formador",
-      6: "Interrelación con el formador",
-      7: "Calidad de los encuentros sincrónicos",
-      8: "Calificación general de la formación",
-      9: "Aprendizaje obtenido",
-    };
-
-    const satisfaccionPromedios = [];
-    for (let i = 1; i <= 9; i++) {
-      satisfaccionPromedios.push({
-        numeroPregunta: i,
-        texto: textosSatisfaccion[i],
-        promedio: promediarLikert(respuestasSatisfaccion, i),
-      });
-    }
-
-    const utilidadData = contarRespuestas(respuestasSatisfaccion, 10);
-    const recomendacionData = contarRespuestas(respuestasSatisfaccion, 11);
+    const docentesFiltradosIds = Array.from(
+      new Set(
+        respuestasCaracterizacionFiltradas.map((r: any) =>
+          String(r.docenteId?._id || r.docenteId)
+        )
+      )
+    );
 
     let totalCertificados = 0;
 
-    if (docentesFiltradosIds && docentesFiltradosIds.length) {
+    if (docentesFiltradosIds.length) {
       totalCertificados = await Certificado.countDocuments({
         docenteId: { $in: docentesFiltradosIds },
       });
-    } else if (docentesFiltradosIds && !docentesFiltradosIds.length) {
-      totalCertificados = 0;
-    } else {
-      totalCertificados = await Certificado.countDocuments();
     }
+
+    const bloquesCaracterizacion = encuestaCaracterizacion
+      ? agruparPreguntasPorBloque(
+          encuestaCaracterizacion,
+          respuestasCaracterizacionFiltradas
+        )
+      : [];
+
+    const bloquesSatisfaccion = encuestaSatisfaccion
+      ? agruparPreguntasPorBloque(encuestaSatisfaccion, respuestasSatisfaccion)
+      : [];
 
     return res.status(200).json({
       filtros: {
         genero: genero || null,
+        edad: edad || null,
+        zona: zona || null,
+      },
+      opcionesFiltros: {
+        genero: generoOpciones,
+        edad: edadOpciones,
+        zona: zonaOpciones,
       },
       kpis: {
         totalProyectos,
         totalInstituciones,
-        totalDocentes,
+        totalDocentesFiltrados: docentesFiltradosIds.length,
         totalMunicipios,
         totalCertificados,
       },
+      baseCaracterizacion: respuestasCaracterizacionFiltradas.length,
+      baseSatisfaccion: respuestasSatisfaccion.length,
       caracterizacion: {
-        genero: generoData,
-        edad: edadData,
-        formacion: formacionData,
+        bloques: bloquesCaracterizacion,
       },
       satisfaccion: {
-        promedios: satisfaccionPromedios,
-        utilidad: utilidadData,
-        recomendacion: recomendacionData,
+        base: respuestasSatisfaccion.length,
+        bloques: bloquesSatisfaccion,
       },
     });
   } catch (error) {
@@ -412,8 +509,7 @@ export const obtenerDashboardInterno = async (
     );
 
     const caracterizacionRespondida = docentesCaracterizacion.size;
-    const caracterizacionPendiente =
-      totalDocentes - caracterizacionRespondida;
+    const caracterizacionPendiente = totalDocentes - caracterizacionRespondida;
 
     const diagnosticaRespondida = docentesDiagnostica.size;
     const diagnosticaPendiente = totalDocentes - diagnosticaRespondida;

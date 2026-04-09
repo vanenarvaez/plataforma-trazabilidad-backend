@@ -2,15 +2,23 @@ import { Router } from "express";
 import {
   generarCertificado,
   consultarCertificadoPorDocumento,
+  listarCertificadosElegiblesPorDocumento,
+  generarCertificadoPublico,
 } from "./certificado.controller";
 import { verifyToken } from "../../middlewares/auth.middleware";
 
 const router = Router();
 
-// Consulta por documento
+// Consulta certificados ya guardados por documento
 router.get("/consultar/:numeroDocumento", consultarCertificadoPorDocumento);
 
-// Generación de certificado
+// Lista certificados elegibles por documento (público)
+router.get("/elegibles/:numeroDocumento", listarCertificadosElegiblesPorDocumento);
+
+// Genera certificado público por documento y proyectoCurso
+router.get("/publico/:numeroDocumento/:proyectoCursoId", generarCertificadoPublico);
+
+// Generación protegida desde módulos internos
 router.get("/:docenteId/:proyectoCursoId", verifyToken, generarCertificado);
 
 export default router;

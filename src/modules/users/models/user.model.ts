@@ -32,6 +32,14 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    intentosFallidos: {
+      type: Number,
+      default: 0,
+    },
+    bloqueadoHasta: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

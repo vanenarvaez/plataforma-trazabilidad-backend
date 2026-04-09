@@ -46,6 +46,13 @@ export const createUser = async (req: Request, res: Response) => {
       });
     }
 
+    // 🔐 Validación de longitud de contraseña (mínimo 4)
+    if (String(password).trim().length < 4) {
+      return res.status(400).json({
+        message: "La contraseña debe tener al menos 4 caracteres",
+      });
+    }
+
     const existingUser = await User.findOne({
       email: String(email).trim().toLowerCase(),
     });
@@ -56,7 +63,7 @@ export const createUser = async (req: Request, res: Response) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(String(password).trim(), 10);
 
     const newUser = new User({
       nombres: String(nombres).trim(),
@@ -114,9 +121,12 @@ export const updateUser = async (req: Request, res: Response) => {
       }
     }
 
-    user.nombres = nombres !== undefined ? String(nombres).trim() : user.nombres;
-    user.apellidos = apellidos !== undefined ? String(apellidos).trim() : user.apellidos;
-    user.email = email !== undefined ? String(email).trim().toLowerCase() : user.email;
+    user.nombres =
+      nombres !== undefined ? String(nombres).trim() : user.nombres;
+    user.apellidos =
+      apellidos !== undefined ? String(apellidos).trim() : user.apellidos;
+    user.email =
+      email !== undefined ? String(email).trim().toLowerCase() : user.email;
     user.rol = rol !== undefined ? rol : user.rol;
     user.activo = activo !== undefined ? Boolean(activo) : user.activo;
 
@@ -146,9 +156,9 @@ export const changeUserPassword = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { password } = req.body;
 
-    if (!password || String(password).trim().length < 6) {
+    if (!password || String(password).trim().length < 4) {
       return res.status(400).json({
-        message: "La contraseña debe tener al menos 6 caracteres",
+        message: "La contraseña debe tener al menos 4 caracteres",
       });
     }
 
@@ -169,6 +179,43 @@ export const changeUserPassword = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       message: "Error al actualizar contraseña",
+      error,
+    });
+  }
+};
+
+export const resetearPassword = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { nuevaPassword } = req.body;
+
+    if (!nuevaPassword || String(nuevaPassword).trim().length < 4) {
+      return res.status(400).json({
+        message: "La nueva contraseña debe tener al menos 4 caracteres",
+      });
+    }
+
+    const hash = await bcrypt.hash(String(nuevaPassword).trim(), 10);
+
+    const usuario = await User.findByIdAndUpdate(
+      id,
+      { password: hash },
+      { new: true }
+    );
+
+    if (!usuario) {
+      return res.status(404).json({
+        message: "Usuario no encontrado",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Contraseña actualizada correctamente",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Error al resetear contraseña",
       error,
     });
   }

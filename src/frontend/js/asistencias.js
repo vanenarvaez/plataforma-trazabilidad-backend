@@ -32,6 +32,10 @@ const mensajeCurso = document.getElementById("mensajeCurso");
 const btnLimpiarCurso = document.getElementById("btnLimpiarCurso");
 const bloqueCrearCurso = document.getElementById("bloqueCrearCurso");
 
+const bloqueGestionCursosProyecto = document.getElementById("bloqueGestionCursosProyecto");
+const proyectoCursosAdmin = document.getElementById("proyectoCursosAdmin");
+const tablaCursosProyecto = document.getElementById("tablaCursosProyecto");
+
 const btnConsultarConsolidado = document.getElementById("btnConsultarConsolidado");
 const btnLimpiarFiltros = document.getElementById("btnLimpiarFiltros");
 const btnDescargarCsvAsistencias = document.getElementById("btnDescargarCsvAsistencias");
@@ -704,6 +708,14 @@ async function cargarProyectos() {
     (item) => item.nombre,
     "Todos los proyectos"
   );
+
+  llenarSelect(
+    proyectoCursosAdmin,
+    proyectosBase,
+    (item) => item._id,
+    (item) => item.nombre,
+    "Seleccione un proyecto"
+  );
 }
 
 async function cargarCursos() {
@@ -716,6 +728,53 @@ async function cargarCursos() {
   }
 
   cursosBase = data;
+}
+
+async function cargarCursosProyectoAdmin(proyectoId) {
+  if (!proyectoId) {
+    tablaCursosProyecto.innerHTML = `
+      <tr><td colspan="3" class="text-center">Seleccione un proyecto</td></tr>
+    `;
+    return;
+  }
+
+  const res = await fetchConToken(`${API_URL}/proyecto-cursos/${proyectoId}`);
+  const data = await res.json();
+
+  if (!Array.isArray(data) || !data.length) {
+    tablaCursosProyecto.innerHTML = `
+      <tr><td colspan="3" class="text-center">No hay cursos</td></tr>
+    `;
+    return;
+  }
+
+  tablaCursosProyecto.innerHTML = data.map(rel => `
+    <tr>
+      <td>${rel.cursoId?.nombreCurso || ""}</td>
+      <td>${rel.activo !== false ? "Activo" : "Inactivo"}</td>
+      <td>
+        <button 
+          class="btn btn-sm ${rel.activo !== false ? "btn-danger" : "btn-success"}"
+          onclick="cambiarEstadoCurso('${rel._id}', ${rel.activo !== false})"
+        >
+          ${rel.activo !== false ? "Desactivar" : "Activar"}
+        </button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+async function cambiarEstadoCurso(id, estadoActual) {
+  const res = await fetchConToken(`${API_URL}/proyecto-cursos/${id}/estado`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ activo: !estadoActual }),
+  });
+
+  if (res.ok) {
+    await cargarCursosProyectoAdmin(proyectoCursosAdmin.value);
+    await cargarRelacionesActivas(); // 🔥 actualiza todo el sistema
+  }
 }
 
 async function cargarDocentes() {
@@ -902,6 +961,10 @@ btnConsultarDetalleDocente.addEventListener("click", consultarDetalleDocente);
 btnDescargarCsvDetalleDocente.addEventListener("click", descargarCsvDetalle);
 btnLimpiarCurso.addEventListener("click", limpiarFormularioCurso);
 
+proyectoCursosAdmin.addEventListener("change", () => {
+  cargarCursosProyectoAdmin(proyectoCursosAdmin.value);
+});
+
 function aplicarRestriccionesPorRolAsistencias() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
@@ -909,6 +972,10 @@ function aplicarRestriccionesPorRolAsistencias() {
 
   if (user.rol === "formador" && bloqueCrearCurso) {
     bloqueCrearCurso.style.display = "none";
+  }
+
+  if (user.rol !== "admin" && bloqueGestionCursosProyecto) {
+    bloqueGestionCursosProyecto.style.display = "none";
   }
 }
 

@@ -23,7 +23,11 @@ const buscadorUsuarios = document.getElementById("buscadorUsuarios");
 const filtroRolUsuarios = document.getElementById("filtroRolUsuarios");
 const filtroEstadoUsuarios = document.getElementById("filtroEstadoUsuarios");
 
+const nuevaPasswordInput = document.getElementById("nuevaPassword");
+const modalPasswordElement = document.getElementById("modalPassword");
+
 let usuariosBase = [];
+let usuarioSeleccionadoPassword = null;
 
 function logout() {
   localStorage.removeItem("token");
@@ -154,6 +158,9 @@ function renderizarTablaUsuarios(lista) {
               <button class="btn btn-sm btn-outline-warning" onclick="cambiarEstadoUsuario('${usuario._id}', ${usuario.activo ? "false" : "true"})">
                 ${usuario.activo ? "Inactivar" : "Activar"}
               </button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="abrirModalPassword('${usuario._id}')">
+                Reset password
+              </button>
             </div>
           </td>
         </tr>
@@ -220,15 +227,89 @@ window.cambiarEstadoUsuario = async function (id, nuevoEstado) {
     const data = await response.json();
 
     if (!response.ok) {
-      mostrarMensajeUsuario(data.message || "No fue posible cambiar el estado", "danger");
+      mostrarMensajeUsuario(
+        data.message || "No fue posible cambiar el estado",
+        "danger"
+      );
       return;
     }
 
-    mostrarMensajeUsuario("Estado del usuario actualizado correctamente", "success");
+    mostrarMensajeUsuario(
+      "Estado del usuario actualizado correctamente",
+      "success"
+    );
     await cargarUsuarios();
   } catch (error) {
     console.error(error);
     mostrarMensajeUsuario("Error de conexión con el servidor", "danger");
+  }
+};
+
+window.abrirModalPassword = function (id) {
+  usuarioSeleccionadoPassword = id;
+
+  if (nuevaPasswordInput) {
+    nuevaPasswordInput.value = "";
+  }
+
+  if (!modalPasswordElement) return;
+
+  const modal = new bootstrap.Modal(modalPasswordElement);
+  modal.show();
+};
+
+window.guardarNuevaPassword = async function () {
+  try {
+    if (!usuarioSeleccionadoPassword) {
+      alert("No se seleccionó un usuario");
+      return;
+    }
+
+    const nuevaPassword = (nuevaPasswordInput?.value || "").trim();
+
+    if (!nuevaPassword) {
+      alert("Ingrese una nueva contraseña");
+      return;
+    }
+
+    if (nuevaPassword.length < 6) {
+      alert("La nueva contraseña debe tener al menos 4 caracteres");
+      return;
+    }
+
+    const response = await fetchConToken(
+      `${API_URL}/users/${usuarioSeleccionadoPassword}/reset-password`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nuevaPassword }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "No fue posible resetear la contraseña");
+      return;
+    }
+
+    alert("Contraseña actualizada correctamente");
+
+    if (nuevaPasswordInput) {
+      nuevaPasswordInput.value = "";
+    }
+
+    if (modalPasswordElement) {
+      const modal = bootstrap.Modal.getInstance(modalPasswordElement);
+      if (modal) {
+        modal.hide();
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión con el servidor");
   }
 };
 
@@ -275,12 +356,17 @@ usuarioForm.addEventListener("submit", async (e) => {
     data = await response.json();
 
     if (!response.ok) {
-      mostrarMensajeUsuario(data.message || "No fue posible guardar el usuario", "danger");
+      mostrarMensajeUsuario(
+        data.message || "No fue posible guardar el usuario",
+        "danger"
+      );
       return;
     }
 
     mostrarMensajeUsuario(
-      idEdicion ? "Usuario actualizado correctamente" : "Usuario creado correctamente",
+      idEdicion
+        ? "Usuario actualizado correctamente"
+        : "Usuario creado correctamente",
       "success"
     );
 

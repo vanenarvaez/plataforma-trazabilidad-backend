@@ -65,3 +65,24 @@ body {
   background-color: var(--color-secondary);
   color: var(--color-white);
 }
+
+.logo-publico-navbar {
+  height: 56px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.logo-interno-navbar {
+  height: 56px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.logo-footer {
+  height: 70px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}

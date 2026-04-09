@@ -24,27 +24,30 @@ btnBuscar.addEventListener("click", async () => {
   numeroDocumentoActual = numeroDocumento;
 
   try {
-    const [resCert, resResp, resEncuestas] = await Promise.all([
-      fetch(`${API_URL}/certificados/consultar/${numeroDocumento}`),
+    const [resCertElegibles, resResp, resEncuestas] = await Promise.all([
+      fetch(`${API_URL}/certificados/elegibles/${numeroDocumento}`),
       fetch(`${API_URL}/respuestas-encuesta/documento/${numeroDocumento}`),
       fetch(`${API_URL}/encuestas/publicas`),
     ]);
 
-    const certificados = resCert.ok ? await resCert.json() : [];
+    const certificadosElegibles = resCertElegibles.ok ? await resCertElegibles.json() : { certificados: [] };
     const respuestas = resResp.ok ? await resResp.json() : [];
     const encuestas = resEncuestas.ok ? await resEncuestas.json() : [];
 
     respuestasRegistradas = Array.isArray(respuestas) ? respuestas : [];
     encuestasActivas = Array.isArray(encuestas) ? encuestas : [];
 
-    renderCertificados(Array.isArray(certificados) ? certificados : []);
+    renderCertificados(
+      certificadosElegibles?.certificados || [],
+      numeroDocumento
+    );
     renderEncuestasRespondidas(respuestasRegistradas);
     renderEncuestasPendientes(encuestasActivas, respuestasRegistradas);
 
     contenido.style.display = "block";
 
     if (
-      (!Array.isArray(certificados) || !certificados.length) &&
+      (!Array.isArray(certificadosElegibles?.certificados) || !certificadosElegibles.certificados.length) &&
       (!Array.isArray(respuestas) || !respuestas.length) &&
       (!Array.isArray(encuestas) || !encuestas.length)
     ) {
@@ -58,7 +61,7 @@ btnBuscar.addEventListener("click", async () => {
   }
 });
 
-function renderCertificados(certificados) {
+function renderCertificados(certificados, numeroDocumento) {
   const cont = document.getElementById("certificados");
 
   if (!certificados.length) {
@@ -66,19 +69,69 @@ function renderCertificados(certificados) {
     return;
   }
 
-  cont.innerHTML = certificados
-    .map(
-      (c) => `
-      <div class="mb-3 border p-3 rounded bg-light">
-        <div><strong>Curso:</strong> ${c.nombreCurso || ""}</div>
-        <div><strong>Asistencia:</strong> ${c.porcentajeAsistencia || 0}%</div>
-        <a href="http://localhost:3000${c.ruta}" target="_blank" class="btn btn-sm btn-secondary mt-2">
-          Ver certificado
-        </a>
+  cont.innerHTML = `
+    <div class="row g-3 align-items-end">
+      <div class="col-md-9">
+        <label class="form-label">Selecciona el certificado</label>
+        <select id="selectCertificado" class="form-select">
+          <option value="">Seleccione un curso certificado</option>
+          ${certificados
+            .map(
+              (c) => `
+                <option value="${c.proyectoCursoId}">
+                  ${c.nombreCurso} - ${c.porcentajeAsistencia}% asistencia
+                </option>
+              `
+            )
+            .join("")}
+        </select>
       </div>
-    `
-    )
-    .join("");
+
+      <div class="col-md-3">
+        <button id="btnDescargarCertificado" class="btn btn-secondary w-100" disabled>
+          Descargar
+        </button>
+      </div>
+    </div>
+
+    <div id="detalleCertificado" class="mt-3 small text-muted">
+      Selecciona un curso para descargar el certificado.
+    </div>
+  `;
+
+  const selectCertificado = document.getElementById("selectCertificado");
+  const btnDescargarCertificado = document.getElementById("btnDescargarCertificado");
+  const detalleCertificado = document.getElementById("detalleCertificado");
+
+  selectCertificado.addEventListener("change", () => {
+    const seleccionado = certificados.find(
+      (c) => String(c.proyectoCursoId) === String(selectCertificado.value)
+    );
+
+    btnDescargarCertificado.disabled = !seleccionado;
+
+    if (!seleccionado) {
+      detalleCertificado.innerHTML =
+        "Selecciona un curso para descargar el certificado.";
+      return;
+    }
+
+    detalleCertificado.innerHTML = `
+      <div><strong>Curso:</strong> ${seleccionado.nombreCurso || ""}</div>
+      <div><strong>Asistencia:</strong> ${seleccionado.porcentajeAsistencia || 0}%</div>
+      <div><strong>Intensidad:</strong> ${seleccionado.duracionHoras || 0} horas</div>
+    `;
+  });
+
+  btnDescargarCertificado.addEventListener("click", () => {
+    const proyectoCursoId = selectCertificado.value;
+    if (!proyectoCursoId) return;
+
+    window.open(
+      `${API_URL}/certificados/publico/${numeroDocumento}/${proyectoCursoId}`,
+      "_blank"
+    );
+  });
 }
 
 function renderEncuestasRespondidas(respuestas) {
@@ -91,32 +144,13 @@ function renderEncuestasRespondidas(respuestas) {
 
   cont.innerHTML = respuestas
     .map((r) => {
-      const detalle = (r.respuestas || [])
-        .map((item) => {
-          const valor = Array.isArray(item.respuesta)
-            ? item.respuesta.join(", ")
-            : item.respuesta;
-
-          return `
-            <li class="mb-1">
-              <strong>${item.numeroPregunta}.</strong> ${item.textoPregunta}<br>
-              <span class="text-muted">${valor}</span>
-            </li>
-          `;
-        })
-        .join("");
-
       return `
         <div class="mb-3 border p-3 rounded bg-light">
           <div><strong>Encuesta:</strong> ${r.encuestaId?.nombre || "Encuesta"}</div>
+          <div><strong>Código:</strong> ${r.encuestaId?.codigo || ""}</div>
+          <div><strong>Tipo:</strong> ${r.encuestaId?.tipo || ""}</div>
           <div><strong>Fecha:</strong> ${formatearFecha(r.fechaRespuesta || r.createdAt)}</div>
           <div><strong>Estado:</strong> ${r.completada ? "Completada" : "Pendiente"}</div>
-          <div class="mt-2">
-            <strong>Respuestas:</strong>
-            <ul class="mt-2 ps-3">
-              ${detalle || "<li class='text-muted'>Sin detalle de respuestas</li>"}
-            </ul>
-          </div>
         </div>
       `;
     })
@@ -137,14 +171,17 @@ function renderEncuestasPendientes(encuestas, respuestas) {
   cont.innerHTML = pendientes
     .map(
       (e) => `
-      <div class="mb-3 border p-3 rounded bg-light d-flex justify-content-between align-items-center">
-        <div>
-          <div><strong>${e.nombre}</strong></div>
-          <div class="text-muted small">${e.descripcion || ""}</div>
+      <div class="mb-3 border p-3 rounded bg-light">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <div><strong>${e.nombre}</strong></div>
+            <div class="text-muted small">${e.descripcion || ""}</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="cargarFormularioEncuesta('${e._id}')">
+            Responder
+          </button>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="cargarFormularioEncuesta('${e._id}')">
-          Responder
-        </button>
+        <div id="formulario_pendiente_${e._id}" class="mt-3"></div>
       </div>
     `
     )
@@ -153,14 +190,19 @@ function renderEncuestasPendientes(encuestas, respuestas) {
 
 function cargarFormularioEncuesta(encuestaId) {
   const encuesta = encuestasActivas.find((e) => String(e._id) === String(encuestaId));
-  const cont = document.getElementById("formularioEncuesta");
+  const cont = document.getElementById(`formulario_pendiente_${encuestaId}`);
 
-  if (!encuesta) {
-    cont.innerHTML = "<div class='text-danger'>No fue posible cargar la encuesta.</div>";
+  if (!encuesta || !cont) {
     return;
   }
 
-  const preguntasHtml = encuesta.preguntas
+  document.querySelectorAll("[id^='formulario_pendiente_']").forEach((div) => {
+    if (div.id !== `formulario_pendiente_${encuestaId}`) {
+      div.innerHTML = "";
+    }
+  });
+
+  const preguntasHtml = (encuesta.preguntas || [])
     .map((pregunta) => {
       if (
         pregunta.tipoRespuesta === "opcion_unica" ||
@@ -172,7 +214,7 @@ function cargarFormularioEncuesta(encuestaId) {
             <label class="form-label fw-semibold">${pregunta.numero}. ${pregunta.texto}</label>
             <select class="form-select" name="pregunta_${pregunta.numero}" data-texto="${pregunta.texto}" required>
               <option value="">Seleccione una opción</option>
-              ${pregunta.opciones
+              ${(pregunta.opciones || [])
                 .map((op) => `<option value="${op}">${op}</option>`)
                 .join("")}
             </select>
@@ -185,7 +227,7 @@ function cargarFormularioEncuesta(encuestaId) {
           <div class="mb-4">
             <label class="form-label fw-semibold">${pregunta.numero}. ${pregunta.texto}</label>
             <div>
-              ${pregunta.opciones
+              ${(pregunta.opciones || [])
                 .map(
                   (op, index) => `
                     <div class="form-check">
@@ -214,33 +256,35 @@ function cargarFormularioEncuesta(encuestaId) {
     .join("");
 
   cont.innerHTML = `
-    <div class="mb-3">
-      <strong>${encuesta.nombre}</strong><br>
-      <small class="text-muted">${encuesta.mensajeInicial || ""}</small>
-    </div>
+    <div class="mt-3 border-top pt-3">
+      <div class="mb-3">
+        <strong>${encuesta.nombre}</strong><br>
+        <small class="text-muted">${encuesta.mensajeInicial || ""}</small>
+      </div>
 
-    <form id="formEncuestaPublica">
-      ${preguntasHtml}
-      <div id="mensajeFormularioPublico" class="small mb-3"></div>
-      <button type="submit" class="btn btn-primary">Enviar respuestas</button>
-    </form>
+      <form id="formEncuestaPublica_${encuestaId}">
+        ${preguntasHtml}
+        <div id="mensajeFormularioPublico_${encuestaId}" class="small mb-3"></div>
+        <button type="submit" class="btn btn-primary">Enviar respuestas</button>
+      </form>
+    </div>
   `;
 
   document
-    .getElementById("formEncuestaPublica")
+    .getElementById(`formEncuestaPublica_${encuestaId}`)
     .addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const mensajeForm = document.getElementById("mensajeFormularioPublico");
+      const mensajeForm = document.getElementById(`mensajeFormularioPublico_${encuestaId}`);
       mensajeForm.textContent = "";
       mensajeForm.className = "small mb-3";
 
       const respuestas = [];
 
-      for (const pregunta of encuesta.preguntas) {
+      for (const pregunta of encuesta.preguntas || []) {
         if (pregunta.tipoRespuesta === "multiple") {
           const checks = document.querySelectorAll(
-            `input[name="pregunta_${pregunta.numero}"]:checked`
+            `#formEncuestaPublica_${encuestaId} input[name="pregunta_${pregunta.numero}"]:checked`
           );
           const valores = Array.from(checks).map((c) => c.value);
 
@@ -257,7 +301,7 @@ function cargarFormularioEncuesta(encuestaId) {
           });
         } else {
           const campo = document.querySelector(
-            `[name="pregunta_${pregunta.numero}"]`
+            `#formEncuestaPublica_${encuestaId} [name="pregunta_${pregunta.numero}"]`
           );
 
           if (!campo || !campo.value) {
