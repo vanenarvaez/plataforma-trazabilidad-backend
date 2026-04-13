@@ -81,10 +81,12 @@ const pluginEtiquetasBarras = {
         const valor = dataset.data[index];
         if (valor === null || valor === undefined) return;
 
-        ctx.font = "12px Arial";
-        ctx.fillStyle = "#311B92";
+        ctx.font = "bold 12px Arial";
+        ctx.fillStyle = "#FFFFFF"; // 🔥 blanco
         ctx.textAlign = "center";
-        ctx.fillText(`${valor}%`, bar.x, bar.y - 8);
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(`${valor}%`, bar.x, bar.y - 10); // 🔥 centrado mejor
       });
     });
 
@@ -415,7 +417,7 @@ function renderizarGraficoBarras(grafico) {
         {
           label: "% asistencia",
           data: grafico.map((item) => item.porcentaje),
-          backgroundColor: "#5E35B1",
+          backgroundColor: "#7E57C2",
           borderColor: "#311B92",
           borderWidth: 1,
         },
@@ -486,8 +488,14 @@ function actualizarResumenFiltros(data) {
     ? "No aplica"
     : estadoAsistenciaModuloFiltro.options[estadoAsistenciaModuloFiltro.selectedIndex]?.text || "Todos";
 
-  resumenFiltrosAsistencia.textContent =
-    `Proyecto: ${proyecto} | Curso: ${curso} | ${modulo} | Certificación: ${certificacion} | Asistencia módulo: ${asistenciaModulo} | Registros: ${data.detalle.length}`;
+  resumenFiltrosAsistencia.innerHTML = `
+    <div><strong>Proyecto:</strong> ${proyecto}</div>
+    <div><strong>Curso:</strong> ${curso}</div>
+    <div><strong>Módulo:</strong> ${modulo}</div>
+    <div><strong>Certificación:</strong> ${certificacion}</div>
+    <div><strong>Asistencia módulo:</strong> ${asistenciaModulo}</div>
+    <div><strong>Registros:</strong> ${data.detalle.length}</div>
+`;
 }
 
 async function consultarConsolidado() {
@@ -570,7 +578,7 @@ async function consultarDetalleDocente() {
     tablaDetalleDocente.innerHTML = filtrado
       .map((item) => `
         <tr>
-          <td>${escaparHtml(item.proyectoCursoId?.proyectoId?.nombre || "")}</td>
+          <td>${escaparHtml(item.docenteId?.proyectoId?.nombre || "")}</td>
           <td>${escaparHtml(item.proyectoCursoId?.cursoId?.nombreCurso || "")}</td>
           <td>Módulo ${escaparHtml(item.moduloNumero)}</td>
           <td>${item.asistio ? "Sí" : "No"}</td>

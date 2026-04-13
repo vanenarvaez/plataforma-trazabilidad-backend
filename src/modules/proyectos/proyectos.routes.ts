@@ -8,6 +8,7 @@ import {
 } from "./proyectos.controller";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { authorizeRoles } from "../../middlewares/roles.middleware";
+import { deleteProyecto } from "./proyectos.controller";
 
 const router = Router();
 
@@ -35,5 +36,12 @@ router.get(
 router.post("/", verifyToken, authorizeRoles("director", "admin"), createProyecto);
 
 router.put("/:id", verifyToken, authorizeRoles("director", "admin"), updateProyecto);
+
+router.delete(
+  "/:id",
+  verifyToken,
+  authorizeRoles("admin"),
+  deleteProyecto
+);
 
 export default router;

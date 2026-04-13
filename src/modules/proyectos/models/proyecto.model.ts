@@ -51,6 +51,10 @@ const proyectoSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    activo: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

@@ -123,7 +123,14 @@ export const registrarAsistencia = async (req: Request, res: Response) => {
 export const listarAsistencias = async (_req: Request, res: Response) => {
   try {
     const asistencias = await Asistencia.find()
-      .populate("docenteId", "nombres apellidos numeroDocumento proyectoId")
+      .populate({
+        path: "docenteId",
+        select: "nombres apellidos numeroDocumento proyectoId",
+        populate: {
+          path: "proyectoId",
+          select: "nombre",
+        },
+      })
       .populate({
         path: "proyectoCursoId",
         match: filtroRelacionActiva,
@@ -153,7 +160,14 @@ export const obtenerAsistenciasPorProyectoCurso = async (
     const { proyectoCursoId } = req.params;
 
     const asistencias = await Asistencia.find({ proyectoCursoId })
-      .populate("docenteId", "nombres apellidos numeroDocumento")
+      .populate({
+        path: "docenteId",
+        select: "nombres apellidos numeroDocumento proyectoId",
+        populate: {
+          path: "proyectoId",
+          select: "nombre",
+        },
+      })
       .populate({
         path: "proyectoCursoId",
         match: filtroRelacionActiva,
@@ -296,9 +310,9 @@ export const obtenerConsolidadoAsistencias = async (
       const moduloSeleccionado = moduloNumero ? Number(moduloNumero) : null;
       const moduloInfo = moduloSeleccionado
         ? modulos.find((m) => m.moduloNumero === moduloSeleccionado) || {
-            moduloNumero: moduloSeleccionado,
-            asistio: false,
-          }
+          moduloNumero: moduloSeleccionado,
+          asistio: false,
+        }
         : null;
 
       return {
@@ -317,8 +331,8 @@ export const obtenerConsolidadoAsistencias = async (
         estadoGeneral: certificado
           ? "Certificado"
           : cumpleAsistencia
-          ? "Cumple asistencia"
-          : "Pendiente",
+            ? "Cumple asistencia"
+            : "Pendiente",
         moduloFiltrado: moduloInfo ? moduloInfo.moduloNumero : null,
         asistioModuloFiltrado: moduloInfo ? Boolean(moduloInfo.asistio) : null,
         modulos,

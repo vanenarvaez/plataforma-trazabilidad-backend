@@ -11,6 +11,10 @@ function logout() {
   window.location.href = "../index.html";
 }
 
+function getUser() {
+  return JSON.parse(localStorage.getItem("user"));
+}
+
 const proyectoForm = document.getElementById("proyectoForm");
 const mensajeProyecto = document.getElementById("mensajeProyecto");
 const tablaProyectos = document.getElementById("tablaProyectos");
@@ -99,12 +103,14 @@ async function cargarProyectos() {
 }
 
 function render(lista) {
+  const user = getUser();
+
   totalProyectos.textContent = String(lista.length);
 
   if (!lista.length) {
     tablaProyectos.innerHTML = `
       <tr>
-        <td colspan="5" class="text-center">No hay proyectos registrados</td>
+        <td colspan="6" class="text-center">No hay proyectos registrados</td>
       </tr>
     `;
     return;
@@ -115,8 +121,21 @@ function render(lista) {
       <td>${escaparHtml(p.nombre || "")}</td>
       <td>${escaparHtml(p.cliente || "")}</td>
       <td>${escaparHtml(p.estado || "")}</td>
+      <td>${p.activo ? "Activo" : "Inactivo"}</td>
       <td>${formatearFecha(p.fechaInicio)}</td>
       <td>${formatearFecha(p.fechaFin)}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" onclick="editarProyecto('${p._id}')">Editar</button>
+        <button class="btn btn-sm btn-outline-warning" onclick="toggleActivo('${p._id}', ${p.activo})">
+          ${p.activo ? "Inactivar" : "Activar"}
+        </button>
+
+        ${
+          user?.rol === "admin"
+            ? `<button class="btn btn-sm btn-outline-danger" onclick="eliminarProyecto('${p._id}')">Eliminar</button>`
+            : ""
+        }
+      </td>
     </tr>
   `).join("");
 }
@@ -235,6 +254,52 @@ function renderDetalle(data) {
     </tr>
   `).join("");
 }
+
+async function eliminarProyecto(id) {
+  if (!confirm("¿Seguro que deseas eliminar este proyecto?")) return;
+
+  await fetchConToken(`${API_URL}/proyectos/${id}`, {
+    method: "DELETE",
+  });
+
+  cargarProyectos();
+}
+
+async function toggleActivo(id, activo) {
+  await fetchConToken(`${API_URL}/proyectos/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ activo: !activo }),
+  });
+
+  cargarProyectos();
+}
+
+window.editarProyecto = function (id) {
+  const proyecto = proyectosBase.find((p) => String(p._id) === String(id));
+  if (!proyecto) return;
+
+  proyectoIdEdicion.value = proyecto._id;
+  document.getElementById("nombre").value = proyecto.nombre || "";
+  document.getElementById("fuenteFinanciacion").value = proyecto.fuenteFinanciacion || "";
+  document.getElementById("cliente").value = proyecto.cliente || "";
+  document.getElementById("fechaInicio").value = formatearFecha(proyecto.fechaInicio);
+  document.getElementById("fechaFin").value = formatearFecha(proyecto.fechaFin);
+  document.getElementById("estado").value = proyecto.estado || "planeacion";
+  document.getElementById("cantidadMunicipios").value = proyecto.cantidadMunicipios ?? "";
+  document.getElementById("cantidadIE").value = proyecto.cantidadIE ?? "";
+  document.getElementById("cantidadSedes").value = proyecto.cantidadSedes ?? "";
+  document.getElementById("cantidadDocentes").value = proyecto.cantidadDocentes ?? "";
+  document.getElementById("cantidadEstudiantes").value = proyecto.cantidadEstudiantes ?? "";
+
+  btnGuardarProyecto.textContent = "Actualizar proyecto";
+  mensajeProyecto.textContent = "Editando proyecto seleccionado";
+  mensajeProyecto.className = "small text-primary";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+
 
 proyectoForm.addEventListener("submit", async (e) => {
   e.preventDefault();

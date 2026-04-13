@@ -54,9 +54,16 @@ export const createInstitucion = async (req: Request, res: Response) => {
       proyectoId,
     } = req.body;
 
-    if (!nombre || !proyectoId) {
+    if (
+      !nombre ||
+      !departamento ||
+      !municipio ||
+      !zona ||
+      !sector ||
+      !proyectoId
+    ) {
       return res.status(400).json({
-        message: "El nombre y el proyectoId son obligatorios",
+        message: "Todos los campos son obligatorios excepto el código DANE",
       });
     }
 
@@ -160,3 +167,50 @@ export const obtenerDetalleInstitucion = async (req: Request, res: Response) => 
     });
   }
 };
+
+export const toggleInstitucion = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const institucion = await Institucion.findById(id);
+
+    if (!institucion) {
+      return res.status(404).json({ message: "Institución no encontrada" });
+    }
+
+    institucion.activo = !institucion.activo;
+    await institucion.save();
+
+    res.status(200).json({
+      message: `Institución ${institucion.activo ? "activada" : "inactivada"}`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al cambiar estado",
+      error,
+    });
+  }
+};
+
+export const deleteInstitucion = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const institucion = await Institucion.findByIdAndDelete(id);
+
+    if (!institucion) {
+      return res.status(404).json({ message: "Institución no encontrada" });
+    }
+
+    res.status(200).json({
+      message: "Institución eliminada correctamente",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al eliminar institución",
+      error,
+    });
+  }
+};
+
+

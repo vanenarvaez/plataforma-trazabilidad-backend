@@ -48,18 +48,40 @@ async function construirElegibilidadPorDocumento(numeroDocumento: string) {
 
   const elegibles = [];
 
+  const cursosProcesados = new Set<string>();
+
   for (const relacion of relaciones) {
     const curso: any = relacion.cursoId;
-    if (!curso) continue;
+    if (!curso?._id) continue;
+
+    const cursoKey = String(curso._id);
+
+    if (cursosProcesados.has(cursoKey)) {
+      continue;
+    }
+
+    cursosProcesados.add(cursoKey);
+
+    const relacionesCurso = await ProyectoCurso.find({
+      cursoId: curso._id,
+    }).select("_id");
+
+    const relacionesIds = relacionesCurso.map((r) => r._id);
 
     const asistencias = await Asistencia.find({
       docenteId: docente._id,
-      proyectoCursoId: relacion._id,
+      proyectoCursoId: { $in: relacionesIds },
       asistio: true,
     });
 
+    const modulosUnicosAsistidos = new Set<number>();
+
+    for (const asistencia of asistencias) {
+      modulosUnicosAsistidos.add(Number(asistencia.moduloNumero));
+    }
+
     const totalModulos = Number(curso.numeroModulos || 0);
-    const totalAsistencias = asistencias.length;
+    const totalAsistencias = modulosUnicosAsistidos.size;
     const porcentajeAsistencia =
       totalModulos > 0 ? (totalAsistencias / totalModulos) * 100 : 0;
 
@@ -68,10 +90,9 @@ async function construirElegibilidadPorDocumento(numeroDocumento: string) {
 
       elegibles.push({
         docenteId: docente._id,
-        proyectoCursoId: relacion._id,
-        proyectoId: relacion.proyectoId?._id || null,
-        proyectoNombre: relacion.proyectoId?.nombre || "",
         cursoId: curso._id,
+        proyectoId: (docente as any).proyectoId?._id || relacion.proyectoId?._id || null,
+        proyectoNombre: (docente as any).proyectoId?.nombre || relacion.proyectoId?.nombre || "",
         nombreCurso: curso.nombreCurso || "",
         duracionHoras: Number(curso.duracionHoras || 0),
         porcentajeAsistencia: Number(porcentajeAsistencia.toFixed(2)),
@@ -152,9 +173,8 @@ function generarPdfCertificado(
       doc.image(logoPath, innerX + innerW - 120, innerY + 12, {
         fit: [90, 45],
         align: "right",
-        valign: "top",
       });
-    } catch {}
+    } catch { }
   }
 
   // Área útil centrada

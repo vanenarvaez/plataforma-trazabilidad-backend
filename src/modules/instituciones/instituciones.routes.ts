@@ -5,6 +5,8 @@ import {
   createInstitucion,
   updateInstitucion,
   obtenerDetalleInstitucion,
+  toggleInstitucion,
+  deleteInstitucion,
 } from "./instituciones.controller";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { authorizeRoles } from "../../middlewares/roles.middleware";
@@ -24,7 +26,7 @@ const router = Router();
 router.get(
   "/",
   verifyToken,
-  authorizeRoles("director"),
+  authorizeRoles("admin", "director", "pedagogico"),
   getInstituciones
 );
 
@@ -49,7 +51,7 @@ router.get(
 router.get(
   "/:id/detalle",
   verifyToken,
-  authorizeRoles("director"),
+  authorizeRoles("admin", "director", "pedagogico"),
   obtenerDetalleInstitucion
 );
 
@@ -63,7 +65,7 @@ router.get(
 router.get(
   "/:id",
   verifyToken,
-  authorizeRoles("director"),
+  authorizeRoles("admin", "director", "pedagogico"),
   getInstitucionById
 );
 
@@ -77,7 +79,7 @@ router.get(
 router.post(
   "/",
   verifyToken,
-  authorizeRoles("director"),
+  authorizeRoles("admin", "director", "pedagogico"),
   createInstitucion
 );
 
@@ -91,8 +93,36 @@ router.post(
 router.put(
   "/:id",
   verifyToken,
-  authorizeRoles("director"),
+  authorizeRoles("admin", "director", "pedagogico"),
   updateInstitucion
+);
+
+/**
+ * @swagger
+ * /api/instituciones/{id}/toggle:
+ *   patch:
+ *     summary: Activar o inactivar institución
+ *     tags: [Instituciones]
+ */
+router.patch(
+  "/:id/toggle",
+  verifyToken,
+  authorizeRoles("admin", "director", "pedagogico"),
+  toggleInstitucion
+);
+
+/**
+ * @swagger
+ * /api/instituciones/{id}:
+ *   delete:
+ *     summary: Eliminar institución
+ *     tags: [Instituciones]
+ */
+router.delete(
+  "/:id",
+  verifyToken,
+  authorizeRoles("admin"),
+  deleteInstitucion
 );
 
 export default router;

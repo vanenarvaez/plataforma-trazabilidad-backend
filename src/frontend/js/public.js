@@ -24,13 +24,35 @@ btnBuscar.addEventListener("click", async () => {
   numeroDocumentoActual = numeroDocumento;
 
   try {
-    const [resCertElegibles, resResp, resEncuestas] = await Promise.all([
-      fetch(`${API_URL}/certificados/elegibles/${numeroDocumento}`),
+    // 1. Primero validar si el docente existe consultando certificados elegibles
+    const resCertElegibles = await fetch(
+      `${API_URL}/certificados/elegibles/${numeroDocumento}`
+    );
+
+    // Si no existe el docente, detener todo aquí
+    if (resCertElegibles.status === 404) {
+      mensaje.textContent =
+        "Lo sentimos, no se encuentra registrado en nuestra base de datos, por favor contacte a su formador.";
+      mensaje.classList.add("text-danger");
+
+      // Limpiar contenedores por seguridad
+      document.getElementById("certificados").innerHTML = "";
+      document.getElementById("encuestasDisponibles").innerHTML = "";
+      document.getElementById("encuestasPendientes").innerHTML = "";
+
+      return;
+    }
+
+    const certificadosElegibles = resCertElegibles.ok
+      ? await resCertElegibles.json()
+      : { certificados: [] };
+
+    // 2. Solo si el docente existe, consultar lo demás
+    const [resResp, resEncuestas] = await Promise.all([
       fetch(`${API_URL}/respuestas-encuesta/documento/${numeroDocumento}`),
       fetch(`${API_URL}/encuestas/publicas`),
     ]);
 
-    const certificadosElegibles = resCertElegibles.ok ? await resCertElegibles.json() : { certificados: [] };
     const respuestas = resResp.ok ? await resResp.json() : [];
     const encuestas = resEncuestas.ok ? await resEncuestas.json() : [];
 
@@ -47,11 +69,13 @@ btnBuscar.addEventListener("click", async () => {
     contenido.style.display = "block";
 
     if (
-      (!Array.isArray(certificadosElegibles?.certificados) || !certificadosElegibles.certificados.length) &&
+      (!Array.isArray(certificadosElegibles?.certificados) ||
+        !certificadosElegibles.certificados.length) &&
       (!Array.isArray(respuestas) || !respuestas.length) &&
       (!Array.isArray(encuestas) || !encuestas.length)
     ) {
-      mensaje.textContent = "No se encontró información asociada a ese documento.";
+      mensaje.textContent =
+        "No se encontró información asociada a este docente.";
       mensaje.classList.add("text-warning");
     }
   } catch (error) {

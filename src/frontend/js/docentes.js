@@ -19,6 +19,7 @@ const institucionSelect = document.getElementById("institucionId");
 
 const proyectoFiltroDocentes = document.getElementById("proyectoFiltroDocentes");
 const buscadorDocentes = document.getElementById("buscadorDocentes");
+const listaDocentesResumen = document.getElementById("listaDocentesResumen");
 const btnDescargarCsvDocentes = document.getElementById("btnDescargarCsvDocentes");
 
 const kpiTotalDocentes = document.getElementById("kpiTotalDocentes");
@@ -211,6 +212,7 @@ async function cargarDocentes() {
 
     docentesBase = data;
     llenarBuscadorDetalle(data);
+    llenarBuscadorResumen(data);
     aplicarFiltrosDocentes();
   } catch (error) {
     console.error(error);
@@ -283,10 +285,12 @@ function obtenerDocentesFiltradosListado() {
 }
 
 function renderizarTablaDocentes(docentes) {
+  const user = JSON.parse(localStorage.getItem("user"));
+
   if (!docentes.length) {
     tablaDocentes.innerHTML = `
       <tr>
-        <td colspan="7" class="text-center">No hay docentes con el filtro aplicado</td>
+        <td colspan="8" class="text-center">No hay docentes con el filtro aplicado</td>
       </tr>
     `;
     return;
@@ -303,6 +307,22 @@ function renderizarTablaDocentes(docentes) {
           <td>${escaparHtml(docente.institucionId?.nombre || "")}</td>
           <td>${escaparHtml(docente.proyectoId?.nombre || "")}</td>
           <td>${docente.activo === false ? "Inactivo" : "Activo"}</td>
+          <td>
+            <div class="d-flex gap-2 flex-wrap">
+              ${user?.rol === "admin" || user?.rol === "director" || user?.rol === "pedagogico"
+          ? `<button class="btn btn-sm btn-outline-primary" onclick="editarDocente('${docente._id}')">Editar</button>
+                     <button class="btn btn-sm btn-outline-warning" onclick="toggleDocente('${docente._id}')">
+                       ${docente.activo === false ? "Activar" : "Inactivar"}
+                     </button>`
+          : ""
+        }
+
+              ${user?.rol === "admin"
+          ? `<button class="btn btn-sm btn-outline-danger" onclick="eliminarDocente('${docente._id}')">Eliminar</button>`
+          : ""
+        }
+            </div>
+          </td>
         </tr>
       `
     )
@@ -466,6 +486,22 @@ function llenarBuscadorDetalle(docentes) {
   });
 }
 
+function llenarBuscadorResumen(docentes) {
+  listaDocentesResumen.innerHTML = "";
+
+  const ordenados = [...docentes].sort((a, b) => {
+    const nombreA = etiquetaDocente(a).toLowerCase();
+    const nombreB = etiquetaDocente(b).toLowerCase();
+    return nombreA.localeCompare(nombreB);
+  });
+
+  ordenados.forEach((docente) => {
+    const option = document.createElement("option");
+    option.value = etiquetaDocente(docente);
+    listaDocentesResumen.appendChild(option);
+  });
+}
+
 function sincronizarDocenteDetalleId() {
   const texto = (buscadorDocenteDetalle.value || "").trim().toLowerCase();
 
@@ -534,6 +570,79 @@ function limpiarDetalleDocente() {
   `;
 }
 
+window.toggleDocente = async (id) => {
+  try {
+    const response = await fetchConToken(`${API_URL}/docentes/${id}/toggle`, {
+      method: "PATCH",
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      alert(data.message || "No fue posible cambiar el estado del docente");
+      return;
+    }
+
+    await cargarDocentes();
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión con el servidor");
+  }
+};
+
+window.eliminarDocente = async (id) => {
+  if (!confirm("¿Desea eliminar este docente?")) return;
+
+  try {
+    const response = await fetchConToken(`${API_URL}/docentes/${id}`, {
+      method: "DELETE",
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      alert(data.message || "No fue posible eliminar el docente");
+      return;
+    }
+
+    await cargarDocentes();
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión con el servidor");
+  }
+};
+
+window.editarDocente = async (id) => {
+  try {
+    const response = await fetchConToken(`${API_URL}/docentes/${id}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "No fue posible cargar el docente");
+      return;
+    }
+
+    docenteForm.dataset.editando = "true";
+    docenteForm.dataset.id = data._id;
+
+    document.getElementById("tipoDocumento").value = data.tipoDocumento || "CC";
+    document.getElementById("numeroDocumento").value = data.numeroDocumento || "";
+    document.getElementById("nombres").value = data.nombres || "";
+    document.getElementById("apellidos").value = data.apellidos || "";
+    document.getElementById("email").value = data.email || "";
+    document.getElementById("telefono").value = data.telefono || "";
+    document.getElementById("institucionId").value = data.institucionId?._id || data.institucionId || "";
+    document.getElementById("proyectoId").value = data.proyectoId?._id || data.proyectoId || "";
+    document.getElementById("activo").checked = data.activo !== false;
+
+    mostrarMensajeDocente("Editando docente seleccionado", "info");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión con el servidor");
+  }
+};
+
 docenteForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -552,8 +661,13 @@ docenteForm.addEventListener("submit", async (e) => {
   };
 
   try {
-    const response = await fetchConToken(`${API_URL}/docentes`, {
-      method: "POST",
+    const editando = docenteForm.dataset.editando === "true";
+    const id = docenteForm.dataset.id;
+    const url = editando ? `${API_URL}/docentes/${id}` : `${API_URL}/docentes`;
+    const method = editando ? "PUT" : "POST";
+
+    const response = await fetchConToken(url, {
+      method,
       headers: {
         "Content-Type": "application/json",
       },
@@ -570,9 +684,14 @@ docenteForm.addEventListener("submit", async (e) => {
       return;
     }
 
-    mostrarMensajeDocente("Docente guardado correctamente", "success");
+    mostrarMensajeDocente(
+      editando ? "Docente actualizado correctamente" : "Docente guardado correctamente",
+      "success"
+    );
 
     docenteForm.reset();
+    docenteForm.dataset.editando = "false";
+    docenteForm.dataset.id = "";
     document.getElementById("tipoDocumento").value = "CC";
     document.getElementById("activo").checked = true;
 

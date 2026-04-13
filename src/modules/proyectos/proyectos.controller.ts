@@ -54,9 +54,17 @@ export const createProyecto = async (req: Request, res: Response) => {
       cantidadEstudiantes,
     } = req.body;
 
-    if (!nombre) {
+    // 🔴 VALIDACIÓN COMPLETA
+    if (
+      !nombre ||
+      !fuenteFinanciacion ||
+      !cliente ||
+      !fechaInicio ||
+      !fechaFin ||
+      !estado
+    ) {
       return res.status(400).json({
-        message: "El nombre del proyecto es obligatorio",
+        message: "Todos los campos son obligatorios y deben estar completos",
       });
     }
 
@@ -152,6 +160,29 @@ export const obtenerDetalleProyecto = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({
       message: "Error al consultar detalle del proyecto",
+      error,
+    });
+  }
+};
+
+export const deleteProyecto = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const proyecto = await Proyecto.findByIdAndDelete(id);
+
+    if (!proyecto) {
+      return res.status(404).json({
+        message: "Proyecto no encontrado",
+      });
+    }
+
+    res.status(200).json({
+      message: "Proyecto eliminado correctamente",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al eliminar proyecto",
       error,
     });
   }

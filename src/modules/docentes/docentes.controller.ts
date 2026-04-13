@@ -181,29 +181,34 @@ export const obtenerFichaDocente = async (req: Request, res: Response) => {
         nombreCurso: string;
         totalModulos: number;
         asistidos: number;
+        modulosAsistidos: Set<number>;
       }
     >();
 
     for (const asistencia of asistencias as any[]) {
       const relacion = asistencia.proyectoCursoId;
       const curso = relacion?.cursoId;
-      const proyecto = relacion?.proyectoId;
 
       if (!relacion || !curso) continue;
 
-      const key = String(relacion._id);
+      // ✅ Agrupar por curso, no por relación proyectoCurso
+      const key = String(curso._id);
 
       if (!mapaCursos.has(key)) {
         mapaCursos.set(key, {
-          proyecto: proyecto?.nombre || "",
+          proyecto: (docente.proyectoId as any)?.nombre || "",
           nombreCurso: curso?.nombreCurso || "",
           totalModulos: Number(curso?.numeroModulos || 0),
           asistidos: 0,
+          modulosAsistidos: new Set<number>(),
         });
       }
 
-      if (asistencia.asistio) {
-        const actual = mapaCursos.get(key)!;
+      const actual = mapaCursos.get(key)!;
+
+      // ✅ Contar cada módulo solo una vez por curso
+      if (asistencia.asistio === true && !actual.modulosAsistidos.has(Number(asistencia.moduloNumero))) {
+        actual.modulosAsistidos.add(Number(asistencia.moduloNumero));
         actual.asistidos += 1;
       }
     }
@@ -247,3 +252,53 @@ export const obtenerFichaDocente = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const toggleDocente = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const docente = await Docente.findById(id);
+
+    if (!docente) {
+      return res.status(404).json({
+        message: "Docente no encontrado",
+      });
+    }
+
+    docente.activo = !docente.activo;
+    await docente.save();
+
+    return res.status(200).json({
+      message: `Docente ${docente.activo ? "activado" : "inactivado"} correctamente`,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al cambiar el estado del docente",
+      error,
+    });
+  }
+};
+
+export const deleteDocente = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const docente = await Docente.findByIdAndDelete(id);
+
+    if (!docente) {
+      return res.status(404).json({
+        message: "Docente no encontrado",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Docente eliminado correctamente",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al eliminar docente",
+      error,
+    });
+  }
+};
+

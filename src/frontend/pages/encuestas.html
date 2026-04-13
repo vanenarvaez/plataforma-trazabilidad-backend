@@ -14,38 +14,39 @@
 <body>
 
   <nav class="navbar px-4 py-3" style="background-color: var(--color-primary);">
-  <div class="d-flex align-items-center gap-3">
-    <img
-      src="../images/logo5blanco.png"
-      alt="Aulas Amigas"
-      style="height:55px; object-fit: contain;"
-    />
-    <span class="text-white fw-bold position-absolute top-50 start-50 translate-middle">Plataforma de Trazabilidad</span>
-  </div>
-
-  <div class="d-flex align-items-center gap-3">
-    <div class="text-white text-end me-3">
-      <div id="nombreUsuario" class="fw-semibold"></div>
-      <small id="rolUsuario"></small>
+    <div class="d-flex align-items-center gap-3">
+      <img
+        src="../images/logo5blanco.png"
+        alt="Aulas Amigas"
+        style="height:55px; object-fit: contain;"
+      />
+      <span class="text-white fw-bold position-absolute top-50 start-50 translate-middle">
+        Plataforma de Trazabilidad
+      </span>
     </div>
 
-    <button class="btn btn-light btn-sm" onclick="logout()">Cerrar sesión</button>
-  </div>
-</nav>
+    <div class="d-flex align-items-center gap-3">
+      <div class="text-white text-end me-3">
+        <div id="nombreUsuario" class="fw-semibold"></div>
+        <small id="rolUsuario"></small>
+      </div>
+
+      <button class="btn btn-light btn-sm" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </nav>
 
   <div class="d-flex">
-    
     <div class="p-3" style="width: 250px; background: var(--color-gray); min-height: 100vh;">
-  <h6 class="text-brand fw-bold mb-3">Menú</h6>
+      <h6 class="text-brand fw-bold mb-3">Menú</h6>
 
-  <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador,comercial">Dashboard</a>
-  <a href="usuarios.html" class="sidebar-link" data-roles="admin">Usuarios</a>
-  <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
-  <a href="instituciones.html" class="sidebar-link" data-roles="admin,director,pedagogico">Instituciones</a>
-  <a href="docentes.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Docentes</a>
-  <a href="asistencias.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Asistencias</a>
-  <a href="encuestas.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Encuestas</a>
-</div>
+      <a href="dashboard.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador,comercial">Dashboard</a>
+      <a href="usuarios.html" class="sidebar-link" data-roles="admin">Usuarios</a>
+      <a href="proyectos.html" class="sidebar-link" data-roles="admin,director">Proyectos</a>
+      <a href="instituciones.html" class="sidebar-link" data-roles="admin,director,pedagogico">Instituciones</a>
+      <a href="docentes.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Docentes</a>
+      <a href="asistencias.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Asistencias</a>
+      <a href="encuestas.html" class="sidebar-link" data-roles="admin,director,pedagogico,formador">Encuestas</a>
+    </div>
 
     <div class="p-4 w-100">
       <h2 class="text-brand fw-bold mb-4">Gestión de encuestas</h2>
@@ -53,7 +54,12 @@
       <div class="row g-4 mb-4">
         <div class="col-md-4">
           <div class="card shadow-sm p-4 h-100">
-            <h5 class="mb-3 text-brand">Encuestas registradas</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <h5 class="mb-0 text-brand">Encuestas registradas</h5>
+              <button id="btnIrCrearEncuesta" type="button" class="btn btn-outline-primary btn-sm">
+                Crear encuesta
+              </button>
+            </div>
 
             <div class="mb-3">
               <label class="form-label">Selecciona una encuesta</label>
@@ -101,6 +107,10 @@
               <div class="col-md-12 d-flex flex-wrap gap-2">
                 <button id="btnConsultarProyecto" class="btn btn-primary">
                   Consultar avance
+                </button>
+
+                <button id="btnLimpiarFiltroProyecto" class="btn btn-outline-secondary">
+                  Limpiar filtro
                 </button>
 
                 <button id="btnDescargarCsvEncuestas" class="btn btn-outline-success" disabled>
@@ -159,7 +169,11 @@
               <div class="col-md-7">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                   <h6 class="mb-0 text-brand">Resumen visual</h6>
-                  <span id="resumenFiltroEncuestas" class="badge text-bg-light border">
+                  <span
+                    id="resumenFiltroEncuestas"
+                    class="badge text-bg-light border"
+                    style="white-space: normal; text-align: left; max-width: 100%;"
+                  >
                     Sin resultados consultados
                   </span>
                 </div>
@@ -176,6 +190,95 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h5 class="mb-0 text-brand">Detalle por docente</h5>
+          <span class="small text-muted">
+            El estado indica si el docente ya respondió la encuesta seleccionada o si aún está pendiente.
+          </span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Docente</th>
+                <th>Encuesta consultada</th>
+                <th>Respondió</th>
+                <th>Total respuestas</th>
+                <th>Estado encuesta</th>
+              </tr>
+            </thead>
+            <tbody id="tablaAvanceEncuestas">
+              <tr>
+                <td colspan="6" class="text-center">
+                  Selecciona un proyecto para consultar el avance
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card shadow-sm p-4 mb-4">
+        <h5 class="mb-3 text-brand">Consulta individual por docente</h5>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-9">
+            <label class="form-label">Buscar docente</label>
+            <input
+              type="text"
+              id="buscadorDocente"
+              class="form-control"
+              placeholder="Escribe nombre o documento"
+              list="listaSugerenciasDocentes"
+              autocomplete="off"
+            />
+            <datalist id="listaSugerenciasDocentes"></datalist>
+            <input type="hidden" id="docenteIdSeleccionado" />
+            <div class="form-text">
+              Escribe el nombre o documento y selecciona una coincidencia sugerida.
+            </div>
+          </div>
+
+          <div class="col-md-3 d-flex align-items-end">
+            <div class="d-flex gap-2 w-100">
+              <button id="btnConsultarRespuestas" class="btn btn-secondary w-100">
+                Consultar respuestas
+              </button>
+              <button id="btnLimpiarConsultaDocente" class="btn btn-outline-secondary w-100" type="button">
+                Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive mb-4">
+          <table class="table table-bordered table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Encuesta</th>
+                <th>Fecha</th>
+                <th>Completada</th>
+                <th>Observaciones</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tablaRespuestas">
+              <tr>
+                <td colspan="5" class="text-center">Selecciona un docente para consultar respuestas</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h6 class="text-brand">Detalle de respuestas</h6>
+        <div id="detalleRespuesta" class="text-muted">
+          Aquí se mostrará el detalle de la respuesta seleccionada.
         </div>
       </div>
 
@@ -264,90 +367,6 @@
 
             <div id="mensajeCrearEncuesta" class="mt-3 small"></div>
           </form>
-        </div>
-      </div>
-
-      <div class="card shadow-sm p-4 mb-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-          <h5 class="mb-0 text-brand">Detalle por docente</h5>
-          <span class="small text-muted">
-            El estado indica si el docente ya respondió la encuesta seleccionada o si aún está pendiente.
-          </span>
-        </div>
-
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover align-middle">
-            <thead>
-              <tr>
-                <th>Documento</th>
-                <th>Docente</th>
-                <th>Encuesta consultada</th>
-                <th>Respondió</th>
-                <th>Total respuestas</th>
-                <th>Estado encuesta</th>
-              </tr>
-            </thead>
-            <tbody id="tablaAvanceEncuestas">
-              <tr>
-                <td colspan="6" class="text-center">
-                  Selecciona un proyecto para consultar el avance
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card shadow-sm p-4">
-        <h5 class="mb-3 text-brand">Consulta individual por docente</h5>
-
-        <div class="row g-3 mb-3">
-          <div class="col-md-9">
-            <label class="form-label">Buscar docente</label>
-            <input
-              type="text"
-              id="buscadorDocente"
-              class="form-control"
-              placeholder="Escribe nombre o documento"
-              list="listaSugerenciasDocentes"
-              autocomplete="off"
-            />
-            <datalist id="listaSugerenciasDocentes"></datalist>
-            <input type="hidden" id="docenteIdSeleccionado" />
-            <div class="form-text">
-              Escribe el nombre o documento y selecciona una coincidencia sugerida.
-            </div>
-          </div>
-
-          <div class="col-md-3 d-flex align-items-end">
-            <button id="btnConsultarRespuestas" class="btn btn-secondary w-100">
-              Consultar respuestas
-            </button>
-          </div>
-        </div>
-
-        <div class="table-responsive mb-4">
-          <table class="table table-bordered table-hover align-middle">
-            <thead>
-              <tr>
-                <th>Encuesta</th>
-                <th>Fecha</th>
-                <th>Completada</th>
-                <th>Observaciones</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody id="tablaRespuestas">
-              <tr>
-                <td colspan="5" class="text-center">Selecciona un docente para consultar respuestas</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h6 class="text-brand">Detalle de respuestas</h6>
-        <div id="detalleRespuesta" class="text-muted">
-          Aquí se mostrará el detalle de la respuesta seleccionada.
         </div>
       </div>
     </div>

@@ -34,6 +34,10 @@ const institucionSchema = new mongoose.Schema(
       ref: "Proyecto",
       required: true,
     },
+    activo: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

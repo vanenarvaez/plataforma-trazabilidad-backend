@@ -17,6 +17,9 @@ const estadoEncuestaFiltro = document.getElementById("estadoEncuestaFiltro");
 const btnConsultarRespuestas = document.getElementById("btnConsultarRespuestas");
 const btnConsultarProyecto = document.getElementById("btnConsultarProyecto");
 const btnDescargarCsvEncuestas = document.getElementById("btnDescargarCsvEncuestas");
+const btnLimpiarFiltroProyecto = document.getElementById("btnLimpiarFiltroProyecto");
+const btnLimpiarConsultaDocente = document.getElementById("btnLimpiarConsultaDocente");
+const btnIrCrearEncuesta = document.getElementById("btnIrCrearEncuesta");
 
 const detalleEncuestaSeleccionada = document.getElementById("detalleEncuestaSeleccionada");
 const tablaRespuestas = document.getElementById("tablaRespuestas");
@@ -261,6 +264,14 @@ function limpiarVistaAvance(mensaje = "Selecciona un proyecto para consultar el 
 
   renderizarGraficoCumplimiento(0, 0);
 }
+
+  function limpiarFiltrosProyecto() {
+      proyectoFiltro.value = "";
+      encuestaFiltro.value = "todas";
+      estadoEncuestaFiltro.value = "todos";
+      ocultarAlertaAvance();
+      limpiarVistaAvance();
+    }
 
 function obtenerNombreProyectoSeleccionado() {
   const valor = proyectoFiltro.value;
@@ -624,8 +635,8 @@ function descargarCsvEncuestas() {
     estadoFiltro === "respondieron"
       ? "respondieron"
       : estadoFiltro === "faltan"
-      ? "faltan"
-      : "todos";
+        ? "faltan"
+        : "todos";
 
   enlace.href = url;
   enlace.download = `encuestas_${nombreProyectoLimpio}_${nombreEncuestaLimpio}_${nombreFiltro}_${fecha}.csv`;
@@ -810,6 +821,22 @@ function limpiarFormularioEncuesta(limpiarMensaje = true) {
   }
 }
 
+function irABloqueCrearEncuesta() {
+  const collapseElement = document.getElementById("collapseCrearEncuesta");
+
+  if (collapseElement) {
+    const collapse = bootstrap.Collapse.getOrCreateInstance(collapseElement);
+    collapse.show();
+  }
+
+  const bloque = document.getElementById("collapseCrearEncuesta");
+  if (bloque) {
+    setTimeout(() => {
+      bloque.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 200);
+  }
+}
+
 async function crearEncuesta(event) {
   event.preventDefault();
 
@@ -871,6 +898,10 @@ async function crearEncuesta(event) {
 }
 
 btnConsultarProyecto.addEventListener("click", consultarAvanceProyecto);
+
+btnLimpiarFiltroProyecto.addEventListener("click", limpiarFiltrosProyecto);
+btnLimpiarConsultaDocente.addEventListener("click", limpiarConsultaDocente);
+btnIrCrearEncuesta.addEventListener("click", irABloqueCrearEncuesta);
 
 estadoEncuestaFiltro.addEventListener("change", () => {
   if (!ultimoProyectoConsultado) return;
@@ -992,6 +1023,23 @@ function verDetalleRespuesta(index) {
       ${respuestasHtml || "<div class='text-muted'>No hay respuestas registradas.</div>"}
     </div>
   `;
+}
+
+function limpiarConsultaDocente() {
+  buscadorDocente.value = "";
+  docenteIdSeleccionado.value = "";
+  respuestasConsultadas = [];
+
+  tablaRespuestas.innerHTML = `
+    <tr>
+      <td colspan="5" class="text-center">Selecciona un docente para consultar respuestas</td>
+    </tr>
+  `;
+
+  detalleRespuesta.innerHTML =
+    "Aquí se mostrará el detalle de la respuesta seleccionada.";
+
+  renderizarSugerenciasDocentes(docentesBase);
 }
 
 function formatearFecha(fecha) {

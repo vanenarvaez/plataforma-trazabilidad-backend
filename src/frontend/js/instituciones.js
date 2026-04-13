@@ -170,10 +170,12 @@ function obtenerInstitucionesFiltradas() {
 }
 
 function renderTablaInstituciones(lista) {
+  const user = JSON.parse(localStorage.getItem("user"));
+
   if (!lista.length) {
     tablaInstituciones.innerHTML = `
       <tr>
-        <td colspan="7" class="text-center">No hay instituciones con el filtro aplicado</td>
+        <td colspan="8" class="text-center">No hay instituciones con el filtro aplicado</td>
       </tr>
     `;
     return;
@@ -190,6 +192,29 @@ function renderTablaInstituciones(lista) {
           <td>${escaparHtml(institucion.zona || "")}</td>
           <td>${escaparHtml(institucion.sector || "")}</td>
           <td>${escaparHtml(institucion.proyectoId?.nombre || "")}</td>
+          <td>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-sm btn-outline-primary" onclick="editarInstitucion('${institucion._id}')">
+                Editar
+              </button>
+
+              <button class="btn btn-sm btn-outline-warning" onclick="toggleInstitucion('${institucion._id}')">
+                ${institucion.activo ? "Inactivar" : "Activar"}
+              </button>
+
+              ${
+                user?.rol === "admin"
+                  ? `<button class="btn btn-sm btn-outline-danger" onclick="eliminarInstitucion('${institucion._id}')">Eliminar</button>`
+                  : `<button
+                      class="btn btn-sm btn-outline-danger"
+                      type="button"
+                      onclick="mensajeEliminarSoloAdmin()"
+                    >
+                      Eliminar
+                    </button>`
+              }
+            </div>
+          </td>
         </tr>
       `
     )
@@ -288,6 +313,83 @@ function renderDetalleInstitucion(data) {
     .join("");
 }
 
+window.toggleInstitucion = async (id) => {
+  try {
+    const response = await fetchConToken(`${API_URL}/instituciones/${id}/toggle`, {
+      method: "PATCH",
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      alert(data.message || "No fue posible cambiar el estado de la institución");
+      return;
+    }
+
+    await cargarInstituciones();
+  } catch (error) {
+    console.error("Error cambiando estado de institución:", error);
+    alert("Error de conexión con el servidor");
+  }
+};
+
+window.eliminarInstitucion = async (id) => {
+  if (!confirm("¿Desea eliminar esta institución?")) return;
+
+  try {
+    const response = await fetchConToken(`${API_URL}/instituciones/${id}`, {
+      method: "DELETE",
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      alert(data.message || "No fue posible eliminar la institución");
+      return;
+    }
+
+    await cargarInstituciones();
+  } catch (error) {
+    console.error("Error eliminando institución:", error);
+    alert("Error de conexión con el servidor");
+  }
+};
+
+window.mensajeEliminarSoloAdmin = () => {
+  alert("Para eliminar una institución, contacte al administrador.");
+};
+
+window.editarInstitucion = async (id) => {
+  try {
+    const response = await fetchConToken(`${API_URL}/instituciones/${id}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "No fue posible cargar la institución");
+      return;
+    }
+
+    document.getElementById("nombre").value = data.nombre || "";
+    document.getElementById("codigoDane").value = data.codigoDane || "";
+    document.getElementById("departamento").value = data.departamento || "";
+    document.getElementById("municipio").value = data.municipio || "";
+    document.getElementById("zona").value = data.zona || "urbana";
+    document.getElementById("sector").value = data.sector || "oficial";
+    document.getElementById("proyectoId").value = data.proyectoId?._id || data.proyectoId || "";
+
+    institucionForm.dataset.editando = "true";
+    institucionForm.dataset.id = data._id;
+
+    mostrarMensajeInstitucion("Editando institución seleccionada", "info");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (error) {
+    console.error("Error cargando institución para edición:", error);
+    alert("Error de conexión con el servidor");
+  }
+};
+
+
+
 function descargarCsvInstituciones() {
   const institucionesFiltradas = obtenerInstitucionesFiltradas();
 
@@ -346,9 +448,31 @@ institucionForm.addEventListener("submit", async (e) => {
     proyectoId: document.getElementById("proyectoId").value,
   };
 
+  if (
+    !body.nombre ||
+    !body.departamento ||
+    !body.municipio ||
+    !body.zona ||
+    !body.sector ||
+    !body.proyectoId
+  ) {
+    mostrarMensajeInstitucion(
+      "Todos los campos son obligatorios excepto el código DANE",
+      "danger"
+    );
+    return;
+  }
+
   try {
-    const response = await fetchConToken(`${API_URL}/instituciones`, {
-      method: "POST",
+    const editando = institucionForm.dataset.editando === "true";
+    const id = institucionForm.dataset.id;
+    const url = editando
+      ? `${API_URL}/instituciones/${id}`
+      : `${API_URL}/instituciones`;
+    const method = editando ? "PUT" : "POST";
+
+    const response = await fetchConToken(url, {
+      method,
       headers: {
         "Content-Type": "application/json",
       },
@@ -365,16 +489,23 @@ institucionForm.addEventListener("submit", async (e) => {
       return;
     }
 
-    mostrarMensajeInstitucion("Institución guardada correctamente", "success");
+    mostrarMensajeInstitucion(
+      editando
+        ? "Institución actualizada correctamente"
+        : "Institución guardada correctamente",
+      "success"
+    );
 
     institucionForm.reset();
+    institucionForm.dataset.editando = "false";
+    institucionForm.dataset.id = "";
     document.getElementById("zona").value = "urbana";
     document.getElementById("sector").value = "oficial";
 
     await cargarInstituciones();
     await cargarProyectosEnSelect();
   } catch (error) {
-    console.error("Error creando institución:", error);
+    console.error("Error guardando institución:", error);
     mostrarMensajeInstitucion("Error de conexión con el servidor", "danger");
   }
 });
