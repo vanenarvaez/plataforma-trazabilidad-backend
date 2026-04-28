@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api";
+const API_URL = `${window.location.origin}/api`;
 
 const btnBuscar = document.getElementById("btnBuscar");
 const mensaje = document.getElementById("mensaje");

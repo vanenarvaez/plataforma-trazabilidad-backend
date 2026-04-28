@@ -13,6 +13,13 @@ app.use(express.json());
 // Servir archivos estáticos de la carpeta uploads
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
+// Servir frontend estático sin cargar index.html automáticamente
+app.use(
+  express.static(path.join(__dirname, "../src/frontend"), {
+    index: false,
+  })
+);
+
 /**
  * @swagger
  * /health:
@@ -32,5 +39,10 @@ app.get("/health", (_req, res) => {
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", routes);
+
+// Ruta principal del frontend
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "../src/frontend/home.html"));
+});
 
 export default app;

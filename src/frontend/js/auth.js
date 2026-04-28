@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api";
+const API_URL = `${window.location.origin}/api`;
 
 const loginForm = document.getElementById("loginForm");
 const mensaje = document.getElementById("mensaje");
